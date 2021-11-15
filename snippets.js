@@ -1,17 +1,19 @@
 
-/*
+
+
+
+
 // Hit Recommmend API directly
 const algoliarecommend = require('@algolia/recommend');
 const client = algoliarecommend(
   '853MYZ81KY',
   'aed9b39a5a489d4a6c9a66d40f66edbf'
 );
-client.getRelatedProducts([
+const products = client.getRelatedProducts([
   {
     indexName: 'flagship_fashion',
     objectID: 'RAD11A0FI',
-    maxRecommendations: 5,
-    threshold: 35,
+    maxRecommendations: 10,
   },
 ])
 .then(({ results }) => {
@@ -20,7 +22,11 @@ client.getRelatedProducts([
 .catch(err => {
   console.log(err);
 });
-*/
+
+
+
+
+
 
 /* Button with Event Listener
 

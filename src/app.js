@@ -6,14 +6,10 @@ const client = algoliarecommend(
   '853MYZ81KY',
   'aed9b39a5a489d4a6c9a66d40f66edbf'
 );
+const indexName = 'flagship_fashion';
 
 // RAD11A0FI    // niyah
 // VA111N0DI    // kenova
-
-// const $form = document.querySelector('#form');
-// const $searchBox = document.querySelector('#searchBox input[type=search]');
-
-
 
 function truncateName(str) {
   return (str.length > 50) ? 
@@ -36,43 +32,36 @@ function itemTemplate(item, color) {
 }
 
 // niyah
-const p1 = 'RAD11A0FI';
 const $hits1 = document.querySelector('#hits');
-const recs1 = generateRelatedProducts($hits1, [ p1 ], getState());
+const recs1 = generateRelatedProducts($hits1, getState());
 console.log("recs1", recs1);
 
-function generateRelatedProducts(container, objectIDs, state) {
-  console.log("generating request...");
+function generateRelatedProducts(container, state) {
+  console.log("generating request...", state);
   const recs = [];
 
-  const props = {
-    indexName: 'flagship_fashion',
-    maxRecommendations: state.maxRecommendations,
-    threshold: state.thresold,
-    fallbackParameters: state.fallbackParameters,
-
-    // only recs with 'ankle' in the name will display
-    //queryParameters: {
-    //  query: 'ankle',
-    //},
-
-    // if there are no recs, display 'shirts'
-    //fallbackParameters: {
-    //  facetFilters: ['category:shirt'],
-    //},
-
-  };
+  // TODO: add in queryParameters
+  // only recs with 'ankle' in the name will display
+  //queryParameters: {
+  //  query: 'ankle',
+  //},
 
   relatedProducts({
-    ...props,
+    indexName: indexName,
+    ...state,
     container: container,
-    objectIDs: objectIDs,
     recommendClient: client,
     headerComponent: () => null,
     itemComponent({ item }) {
       recs.push(item.objectID);
-      const color = 'blue';
-      const score = item._score ? item._score : 'fallback';
+
+
+      var score = item._score ? item._score : 'fallback';
+      var color = (recs1.includes(item.objectID)) ? 'blue' : 'red';
+      if (score == 'fallback') {
+        color = 'gray';
+      }
+
       return createElement('article', {
         dangerouslySetInnerHTML: {
           __html: `
@@ -104,14 +93,38 @@ function getState() {
     };
   }
 
+  var products = Array.from(
+    document.querySelectorAll("input[name='products']:checked")).map((elem) => elem.value);
+  console.log("products", products);
+
   const state = {
-    thresold: parseInt(document.getElementById("myRange").value),
+    objectIDs: products,
+    threshold: parseInt(document.getElementById("myRange").value),
     maxRecommendations: parseInt(document.querySelector('input[name=maxRecs]:checked').value),
     fallbackParameters: fallback,
   };
-  console.log("state", state);
   return state;
 }
+
+//
+// Products Checkbox
+//
+// Select all checkboxes with the name 'settings' using querySelectorAll.
+var checkboxes = document.querySelectorAll("input[type=checkbox][name=products]");
+let products = []
+
+// Use Array.forEach to add an event listener to each checkbox.
+checkboxes.forEach(function(checkbox) {
+  checkbox.addEventListener('change', function() {
+    products = 
+      Array.from(checkboxes) // Convert checkboxes to an array to use filter and map.
+      .filter(i => i.checked) // Use Array.filter to remove unchecked checkboxes.
+      .map(i => i.value) // Use Array.map to extract only the checkbox values from the array of objects.
+      
+    console.log("updating projects", products);
+    generateRelatedProducts($hits1, getState());
+  })
+});
 
 
 //
@@ -126,7 +139,7 @@ slider.oninput = function() {
 }
 slider.onchange = function() {
   console.log("updated threshold:", this.value);
-  generateRelatedProducts($hits1, [ p1 ], getState());
+  generateRelatedProducts($hits1, getState());
 }
 
 //
@@ -136,7 +149,7 @@ var radiosRecs = document.forms["maxRecs"].elements["maxRecs"];
 for(var i = 0, max = radiosRecs.length; i < max; i++) {
     radiosRecs[i].onclick = function() {
         console.log("updated max recs:", this.value);
-        generateRelatedProducts($hits1, [ p1 ], getState());
+        generateRelatedProducts($hits1, getState());
     }
 }
 
@@ -147,7 +160,7 @@ var radiosFallback = document.forms["fallback"].elements["fallback"];
 for(var i = 0, max = radiosFallback.length; i < max; i++) {
     radiosFallback[i].onclick = function() {
         console.log("updated fallback:", this.value);
-        generateRelatedProducts($hits1, [ p1 ], getState());
+        generateRelatedProducts($hits1, getState());
     }
 }
 
