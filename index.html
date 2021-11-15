@@ -28,14 +28,43 @@
 
     <div class="container">
       <div class="container-app">
-        <div class="filters"></div>
+
+        <div>
+          <h3>Coming soon....</h3>
+          <ul>
+            <li>Adding rules to Recommend</li>
+            <li>Distinct</li>
+          </ul>
+        </div>
+
+        <div id="demo"></div>
+        <div class="slidecontainer">
+          <input type="range" min="0" max="100" value="0" class="slider" id="myRange">
+        </div>
+
+        <div>
+          <form name="maxRecs">
+            <label for="maxRecs">Max Recommendations:</label>
+            <br>
+            <input type="radio" name="maxRecs" value="3">3
+            <input type="radio" name="maxRecs" value="5" checked>5
+            <input type="radio" name="maxRecs" value="10">10
+          </form>
+        </div>
+
+
+        <div>
+          <form name="fallback">
+            <label for="fallback">Fallback Params:</label>
+            <br>
+            <input type="radio" name="fallback" value="none" checked>None
+            <input type="radio" name="fallback" value="best-sellers">Best Sellers
+            <input type="radio" name="fallback" value="shirts">Shirts
+            <input type="radio" name="fallback" value="shoes">Shoes
+          </form>
+        </div>
 
         <div class="search-container">
-          <div id="searchBox">
-            <form role="search" id="form">
-              <input type="search" placeholder="Type a objectID" />
-            </form>
-          </div>
             <h2>Niyah</h2>
             <div id="hits"></div>
 
