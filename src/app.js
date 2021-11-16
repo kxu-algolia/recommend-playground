@@ -87,12 +87,17 @@ function getState() {
   // TODO: make fallback params editable
   var fallback = {};
   var fallbackValue = document.querySelector('input[name=fallback]:checked').value;
-  if (fallbackValue == 'shirts') {
+  if (fallbackValue === 'shirts') {
+    console.log("shirts");
     fallback = {
       facetFilters: ['category:shirt']
     };
+  } else if (fallbackValue === 'accessories') {
+    console.log("accessories");
+    fallback = {
+      facetFilters: ["categories:Accessories"]
+    };
   }
-
   var products = Array.from(
     document.querySelectorAll("input[name='products']:checked")).map((elem) => elem.value);
   console.log("products", products);
@@ -165,61 +170,3 @@ for(var i = 0, max = radiosFallback.length; i < max; i++) {
 }
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-/*
-// kenova
-const p2 = 'VA111N0DI';
-const $hits2 = document.querySelector('#hits2');
-const recs2 = []; 
-relatedProducts({
-  ...props,
-  container: $hits2,
-  objectIDs: [ p2 ],
-  recommendClient: client,
-  headerComponent: () => null,
-  itemComponent({ item }) {
-    recs2.push(item.objectID);
-    return createElement('article', itemTemplate(item, 'red'));
-  },
-});
-console.log("recs2", recs2);
-
-// both 
-const $hits3 = document.querySelector('#hits3');
-relatedProducts({
-  ...props,
-  container: $hits3,
-  objectIDs: [p1, p2],
-  recommendClient: client,
-  headerComponent: () => null,
-  itemComponent({ item }) {
-    console.log("merging", item.objectID);
-    var color = (recs1.includes(item.objectID)) ? 'blue' : 'red';
-    return createElement('article', itemTemplate(item, color));
-  },
-});
-*/
-
-
-// const $form = document.querySelector('#form');
-
-/*
-$form.addEventListener('submit', (event) => {
-  event.preventDefault();
-  const query = $searchBox.value;
-  renderHits(query);
-});
-// renderHits($searchBox.value);
-*/
