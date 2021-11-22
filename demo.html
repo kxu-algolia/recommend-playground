@@ -12,36 +12,39 @@
   </head>
 
   <body>
-    <section class="w-full max-w-6xl mx-auto px-4 m-4 border-2 border-red-600">
 
-      <div class="p-4 mx-6 my-2 border-2 border-purple-600">
-        <h1 class="text-3xl">Algolia Recommend: How does it work? </h1>
+    <div class="w-full max-height-md bg-blue-200 ">
+
+      <div class="p-4 mx-6 flex justify-between">
+        <h1 class="text-3xl">[DEMO] Algolia Recommend: Related Products</h1>
+        <img class="object-contain" src="https://res.cloudinary.com/hilnmyskv/image/upload/c_fit,w_113,h_36/algolia-logo.png">
       </div>
+    </div>
 
+    <div class="w-full max-w-6xl mx-auto px-4 m-4 ">
       <div class="grid md:grid-cols-12 gap-5 p-4 m-2">
 
         <div class="md:col-span-9">
 
           <!-- shopping cart -->
           <!-- https://codepen.io/abdelrhman/pen/BaNPVJO -->
-          <div class="p-4 mb-2 border-2 border-green-600">
+          <div class="p-4 mb-2 border-2">
               <div class="flex justify-between border-b pb-4">
                 <h1 class="text-3xl">Shopping Cart</h1>
-                <h2 class="font-semibold text-2xl">3 Items</h2>
               </div>
 
               <!-- Product Header -->
-              <div class="flex my-6">
-                <h3 class="font-semibold text-gray-600 text-xs uppercase w-2/4">Product Details</h3>
-                <h3 class="font-semibold text-center text-gray-600 text-xs uppercase w-1/4 text-center">Quantity</h3>
-                <h3 class="font-semibold text-center text-gray-600 text-xs uppercase w-1/4 text-center">Price</h3>
+              <div class="flex my-4">
+                <h3 class="font-semibold text-gray-600 text-xs uppercase w-4/6">Product Details</h3>
+                <h3 class="font-semibold text-center text-gray-600 text-xs uppercase w-1/6 text-center">Quantity</h3>
+                <h3 class="font-semibold text-center text-gray-600 text-xs uppercase w-1/6 text-center">Price</h3>
               </div>
 
               <div id="products"></div>
           </div>
 
           <!-- Related Products -->
-          <div class="search-container p-4 mb-2 border-2 border-green-600">
+          <div class="search-container p-4 mb-2 border-2">
             <h1 class="text-3xl pb-6">Related Products</h1>
             <div id="hits"></div>
           </div>
@@ -50,18 +53,21 @@
 
 
         <!-- Control Panel -->
-        <div class="md:col-span-3 md:pt-0 p-2 border-2 border-blue-600">
-          <div class="py-2 mb-2">
-            <h1 class="text-2xl">Control Panel</h1>
+        <div class="md:col-span-3 md:pt-0 p-4 mb-2 border-2 bg-gray-100">
+          <div class="py-4 mb-2">
+            <h1 class="text-3xl pb-4">Configuration</h1>
+            <p>Related Products
+              <a class="underline text-blue-600 hover:text-blue-800 visited:text-purple-600" href="https://www.algolia.com/doc/api-reference/api-methods/get-related-products/#parameters">parameters</a>
+            </p>
           </div>
 
           <!-- Threshold -->
-          <div class="block my-2">
-            <span class="text-gray-700">Threshold</span>
-            <div class=" slidecontainer">
+          <div class="block my-6">
+            <span class="text-gray-700 font-mono font-semibold">threshold</span>
+            <div class="slidecontainer my-1">
               <input type="range" min="0" max="100" value="0" class="slider" id="myRange">
             </div>
-            <span>Value: 
+            <span>value: 
               <div id="demo" class="inline-block"></div>
             </span>
 
@@ -69,9 +75,9 @@
 
           <!-- Max Recommendations -->
           <!-- https://tailwind-elements.com/docs/standard/forms/radio/ -->
-          <div class="block my-2">
+          <div class="block my-6">
             <form name="maxRecs">
-              <label for="maxRecs" class="text-gray-700">Max Recommendations</label>
+              <label for="maxRecs" class="text-gray-700 font-mono font-semibold">maxRecommendations</label>
               <div class="mt-2">
                 <div>
                     <input type="radio" name="maxRecs" value="3" />
@@ -91,8 +97,8 @@
 
 
           <!-- Fallback Parameters -->
-          <div class="block my-2">
-            <span class="text-gray-700">fallbackParameters</span>
+          <div class="block my-6">
+            <span class="text-gray-700 font-mono font-semibold">fallbackParameters</span>
             <form name="fallback">
               <div class="mt-2">
                 <div>
@@ -113,7 +119,7 @@
 
         </div>
       </div>
-    </section>
+    </div>
 
 
     <script src="./src/demo.js"></script>

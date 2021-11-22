@@ -15,12 +15,11 @@ const indexName = 'flagship_fashion';
 const $hits = document.querySelector('#hits');
 const $table = document.getElementById('products');
 
-const products = [
-  "AD541C01I",        // terrex
-  "1MI82N009",        // graphic t shirt
-];
+const objectIDs = {
+  "AD541C01I": "red",         // terrex
+  "1MI82N009": "blue",        // graphic t shirt  
+};
 var recs1 = null;     // store recs for product to color-code recommendations
-
 
 const searchClient = algoliasearch(
   '853MYZ81KY', 
@@ -29,7 +28,7 @@ const searchClient = algoliasearch(
 
 searchClient
   .multipleQueries(
-    generateMultiQuery(products, indexName)
+    generateMultiQuery(objectIDs, indexName)
   )
   .then(({ results }) => {
     for (const result of results) {
@@ -40,18 +39,18 @@ searchClient
   })
   .then(() => {
     recs1 = generateRelatedProducts($hits, getState());
-    console.log("recs1", recs1);
+  })
+  .then(() => {
+    initializeEventListeners();
   });
-
-
 
 
 //
 // Generate Product Rows 
 //
-function generateMultiQuery(products, indexName) {
+function generateMultiQuery(objectIDs, indexName) {
   var queries = [];
-  for (const product of products) {
+  for (const objectID of Object.keys(objectIDs)) {
     queries.push({
       indexName: indexName,
       attributesToRetrieve: [  
@@ -63,32 +62,36 @@ function generateMultiQuery(products, indexName) {
         'category', 
         'full_url_image', 
       ],
-      query: product,
+      query: objectID,
     })
   }
   return queries;
 }
 
 function generateProductRow(item, checked = false) {
+
+  const color = objectIDs[item.objectID];
+
   return `
     <!-- Product Row -->
-    <div class="flex items-center -mx-4 px-6 py-5">
+    <div class="flex items-center -mx-4 px-4 py-2 my-4 border-2 border-${color}-400">
 
       <!-- Product -->
-      <div class="flex w-2/4">
+      <div class="flex w-4/6">
         <label class="mr-4 inline-flex items-center">
           <input type="checkbox" name="products" value="${item.objectID}" ${(checked) ? 'checked' : ''} />
         </label>
         <div class="w-20">
           <img class="h-24" src="${item.full_url_image}" alt="">
         </div>
-        <div class="flex flex-col justify-between ml-4 flex-grow">
-          <span class="font-bold text-sm">${item.name}</span>
+        <div class="flex flex-col ml-4 mt-2 flex-grow">
+          <span class="font-bold text-sm mb-2">${item.name}</span>
+          <span class="text-sm">Associated recommendations are shown in <span class="text-${color}-600">${color}</span></span>
         </div>
       </div>
 
       <!-- Quantity -->
-      <div class="flex justify-center w-1/4">
+      <div class="flex justify-center w-1/6">
         <svg class="fill-current text-gray-600 w-3" viewBox="0 0 448 512"><path d="M416 208H32c-17.67 0-32 14.33-32 32v32c0 17.67 14.33 32 32 32h384c17.67 0 32-14.33 32-32v-32c0-17.67-14.33-32-32-32z"/>
         </svg>
         <input class="mx-2 border text-center w-8" type="text" value="1">
@@ -98,7 +101,7 @@ function generateProductRow(item, checked = false) {
       </div>
 
       <!-- Price -->
-      <span class="text-center w-1/4 font-semibold text-sm">${item.price}</span>
+      <span class="text-center w-1/6 font-semibold text-sm">${item.price}</span>
       
     </div>`;
 }
@@ -114,22 +117,8 @@ function truncateName(str) {
     str;
 }
 
-function itemTemplate(item, color) {
-  return {
-    dangerouslySetInnerHTML: {
-      __html: `
-        <li class="ais-hits--item" style="border-color: ${color}">
-          <img src="${item.full_url_image}" width="100">
-          <h3>${truncateName(item.name)}</h3>
-          <p>${item.objectID}</p>
-          <p>${item._score}</p>
-        </li>`,
-    },
-  };
-}
-
 function generateRelatedProducts(container, state) {
-  console.log("generating request...", state);
+  console.log("getting relatedProducts()...", state);
   const recs = [];
 
   // TODO: add in queryParameters
@@ -164,13 +153,14 @@ function generateRelatedProducts(container, state) {
       }
 
       return createElement('article', {
+        class: `border-2 border-${color}-400 h-full`,
         dangerouslySetInnerHTML: {
           __html: `
-            <li class="ais-hits--item" style="border-color: ${color}">
+            <li class="ais-hits--item p-2">
               <img src="${item.full_url_image}" width="100">
-              <h3>${truncateName(item.name)}</h3>
+              <h3 class="font-bold text-sm mb-2">${truncateName(item.name)}</h3>
               <p>${item.objectID}</p>
-              <p>${score}</p>
+              <p><span class="font-bold text-sm">score: </span>${score}</p>
             </li>`,
         },
       });
@@ -188,7 +178,6 @@ function getState() {
   // Products
   var products = Array.from(
   document.querySelectorAll("input[name='products']:checked")).map((elem) => elem.value);
-  console.log("products", products);
 
   // Fallback state
   var fallback = document.querySelector('input[name=fallback]:checked').value;
@@ -215,34 +204,50 @@ function getState() {
 //
 // Initialize Event Listeners
 //
+function initializeEventListeners() {
+  //
+  // Products Checkbox
+  //
+  // Select all checkboxes with the name 'settings' using querySelectorAll.
+  var checkboxes = document.querySelectorAll("input[type=checkbox][name=products]");
+  let products = []
 
-// Threshold Slider
-var slider = document.getElementById("myRange");
-var output = document.getElementById("demo");
-output.innerHTML = slider.value; // Display the default slider value
-// Update the current slider value (each time you drag the slider handle)
-slider.oninput = function() {
-    output.innerHTML = this.value;
-}
-slider.onchange = function() {
-  console.log("updated threshold:", this.value);
-  generateRelatedProducts($hits, getState());
-}
+  // Use Array.forEach to add an event listener to each checkbox.
+  checkboxes.forEach(function(checkbox) {
+    checkbox.addEventListener('change', function() {
+      products = 
+        Array.from(checkboxes)  // Convert checkboxes to an array to use filter and map.
+        .filter(i => i.checked) // Use Array.filter to remove unchecked checkboxes.
+        .map(i => i.value)      // Use Array.map to extract only the checkbox values from the array of objects.
+      generateRelatedProducts(hits, getState());
+    })
+  });
 
-// Max Recommendations
-var radiosRecs = document.forms["maxRecs"].elements["maxRecs"];
-for(var i = 0, max = radiosRecs.length; i < max; i++) {
-    radiosRecs[i].onclick = function() {
-        console.log("updated max recs:", this.value);
-        generateRelatedProducts($hits, getState());
-    }
-}
+  // Threshold Slider
+  var slider = document.getElementById("myRange");
+  var output = document.getElementById("demo");
+  output.innerHTML = slider.value; // Display the default slider value
+  // Update the current slider value (each time you drag the slider handle)
+  slider.oninput = function() {
+      output.innerHTML = this.value;
+  }
+  slider.onchange = function() {
+    generateRelatedProducts($hits, getState());
+  }
 
-// Fallback Params
-var radiosFallback = document.forms["fallback"].elements["fallback"];
-for(var i = 0, max = radiosFallback.length; i < max; i++) {
-    radiosFallback[i].onclick = function() {
-        console.log("updated fallback:", this.value);
-        generateRelatedProducts($hits, getState());
-    }
+  // Max Recommendations
+  var radiosRecs = document.forms["maxRecs"].elements["maxRecs"];
+  for(var i = 0, max = radiosRecs.length; i < max; i++) {
+      radiosRecs[i].onclick = function() {
+          generateRelatedProducts($hits, getState());
+      }
+  }
+
+  // Fallback Params
+  var radiosFallback = document.forms["fallback"].elements["fallback"];
+  for(var i = 0, max = radiosFallback.length; i < max; i++) {
+      radiosFallback[i].onclick = function() {
+          generateRelatedProducts($hits, getState());
+      }
+  }
 }
