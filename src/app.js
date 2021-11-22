@@ -12,8 +12,12 @@ const client = algoliarecommend(
 );
 const indexName = 'flagship_fashion';
 
+// V1 - doesn't work any more
 // RAD11A0FI    // niyah
 // VA111N0DI    // kenova
+
+// AD541C01I    // terrex
+// 1MI82N009    // graphic t shirt
 
 function truncateName(str) {
   return (str.length > 50) ? 
@@ -55,7 +59,7 @@ function generateRelatedProducts(container, state) {
     ...state,
     container: container,
     recommendClient: client,
-    view: horizontalSlider,
+    //view: horizontalSlider,
     headerComponent: () => null,
     itemComponent({ item }) {
       recs.push(item.objectID);

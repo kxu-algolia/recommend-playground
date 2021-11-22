@@ -27,55 +27,58 @@
     </header>
 
     <div class="container">
-      <div class="container-app">
-
-        <div>
-          <h3>Coming soon....</h3>
-          <ul>
-            <li>Adding rules to Recommend</li>
-            <li>Distinct</li>
-          </ul>
-        </div>
+      <div>
+        <h3>Coming soon....</h3>
+        <ul>
+          <li>Adding rules to Recommend</li>
+          <li>Distinct</li>
+        </ul>
+      </div>
 
 
-        <div id="demo"></div>
-        <div class="slidecontainer">
-          <input type="range" min="0" max="100" value="0" class="slider" id="myRange">
-        </div>
+      <div id="demo"></div>
+      <div class="slidecontainer">
+        <input type="range" min="0" max="100" value="0" class="slider" id="myRange">
+      </div>
 
-        <div>
-          <form name="maxRecs">
-            <label for="maxRecs">Max Recommendations:</label>
-            <br>
-            <input type="radio" name="maxRecs" value="3">3
-            <input type="radio" name="maxRecs" value="5">5
-            <input type="radio" name="maxRecs" value="10" checked>10
-          </form>
-        </div>
-
-        <div>
-          <form name="fallback">
-            <label for="fallback">Fallback Params:</label>
-            <br>
-            <input type="radio" name="fallback" value="none" checked>None
-            <input type="radio" name="fallback" value="shirts">"Category: Shirts"
-            <input type="radio" name="fallback" value="accessories">"Category: Accessories"
-          </form>
-        </div>
-
-
-        <div>
-          <h1>Shopping Cart</h1>
-          <input type="checkbox" name="products" value="RAD11A0FI" checked>Niyah T-Bar Sandals (Black)
+      <div>
+        <form name="maxRecs">
+          <label for="maxRecs">Max Recommendations:</label>
           <br>
-          <input type="checkbox" name="products" value="VA111N0DI">Kenova - Classic Ankle Boots (Black)
-          <br>
-        </div>
+          <input type="radio" name="maxRecs" value="3">3
+          <input type="radio" name="maxRecs" value="5">5
+          <input type="radio" name="maxRecs" value="10" checked>10
+        </form>
+      </div>
 
-        <div class="search-container">
-            <h2>Related Products</h2>
-            <div id="hits"></div>
-        </div>
+      <div>
+        <form name="fallback">
+          <label for="fallback">Fallback Params:</label>
+          <br>
+          <input type="radio" name="fallback" value="none" checked>None
+          <input type="radio" name="fallback" value="shirts">"Category: Shirts"
+          <input type="radio" name="fallback" value="accessories">"Category: Accessories"
+        </form>
+      </div>
+
+
+      <div>
+        <h1>Shopping Cart</h1>
+        <input type="checkbox" name="products" value="AD541C01I" checked>Terrex
+        <br>
+        <input type="checkbox" name="products" value="1MI82N009">graphic t shirt
+
+        <!-- V1 - these products no longer have recommendations
+        <input type="checkbox" name="products" value="RAD11A0FI" checked>Niyah T-Bar Sandals (Black)
+        <br>
+        <input type="checkbox" name="products" value="VA111N0DI">Kenova - Classic Ankle Boots (Black)
+        -->
+        <br>
+      </div>
+
+      <div class="search-container">
+          <h2>Related Products</h2>
+          <div id="hits"></div>
       </div>
     </div>
 
