@@ -1,6 +1,10 @@
 import algoliarecommend from '@algolia/recommend';
 import { relatedProducts } from '@algolia/recommend-js';
+import { horizontalSlider } from '@algolia/ui-components-horizontal-slider-js';
 import { createElement } from 'preact';
+
+
+import '@algolia/ui-components-horizontal-slider-theme';
 
 const client = algoliarecommend(
   '853MYZ81KY',
@@ -51,6 +55,7 @@ function generateRelatedProducts(container, state) {
     ...state,
     container: container,
     recommendClient: client,
+    view: horizontalSlider,
     headerComponent: () => null,
     itemComponent({ item }) {
       recs.push(item.objectID);
