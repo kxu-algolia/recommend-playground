@@ -1,9 +1,7 @@
 import algoliasearch from 'algoliasearch';
 import algoliarecommend from '@algolia/recommend';
 import { relatedProducts } from '@algolia/recommend-js';
-import { horizontalSlider } from '@algolia/ui-components-horizontal-slider-js';
 import { createElement } from 'preact';
-import '@algolia/ui-components-horizontal-slider-theme';
 
 const client = algoliarecommend(
   '853MYZ81KY',
@@ -21,112 +19,28 @@ const objectIDs = {
 };
 var recs1 = null;     // store recs for product to color-code recommendations
 
-const searchClient = algoliasearch(
-  '853MYZ81KY', 
-  'aed9b39a5a489d4a6c9a66d40f66edbf'
-);
-
-searchClient
-  .multipleQueries(
-    generateMultiQuery(objectIDs, indexName)
-  )
-  .then(({ results }) => {
-    for (const result of results) {
-      const html = generateProductRow(result.hits[0], true)
-      const fragment = document.createRange().createContextualFragment(html);
-      $table.appendChild(fragment);
-    }
-  })
-  .then(() => {
-    recs1 = generateRelatedProducts($hits, getState());
-  })
-  .then(() => {
-    initializeEventListeners();
-  });
-
-
-//
-// Generate Product Rows 
-//
-function generateMultiQuery(objectIDs, indexName) {
-  var queries = [];
-  for (const objectID of Object.keys(objectIDs)) {
-    queries.push({
-      indexName: indexName,
-      attributesToRetrieve: [  
-        'objectID',
-        'brand', 
-        'name', 
-        'unformated_price', 
-        'price',
-        'category', 
-        'full_url_image', 
-      ],
-      query: objectID,
-    })
-  }
-  return queries;
-}
-
-function generateProductRow(item, checked = false) {
-
-  const color = objectIDs[item.objectID];
-
-  return `
-    <!-- Product Row -->
-    <div class="flex items-center -mx-4 px-4 py-2 my-4 border-2 border-${color}-400">
-
-      <!-- Product -->
-      <div class="flex w-4/6">
-        <label class="mr-4 inline-flex items-center">
-          <input type="checkbox" name="products" value="${item.objectID}" ${(checked) ? 'checked' : ''} />
-        </label>
-        <div class="w-20">
-          <img class="h-24" src="${item.full_url_image}" alt="">
-        </div>
-        <div class="flex flex-col ml-4 mt-2 flex-grow">
-          <span class="font-bold text-sm mb-2">${item.name}</span>
-          <span class="text-sm">Associated recommendations are shown in <span class="text-${color}-600">${color}</span></span>
-        </div>
-      </div>
-
-      <!-- Quantity -->
-      <div class="flex justify-center w-1/6">
-        <svg class="fill-current text-gray-600 w-3" viewBox="0 0 448 512"><path d="M416 208H32c-17.67 0-32 14.33-32 32v32c0 17.67 14.33 32 32 32h384c17.67 0 32-14.33 32-32v-32c0-17.67-14.33-32-32-32z"/>
-        </svg>
-        <input class="mx-2 border text-center w-8" type="text" value="1">
-        <svg class="fill-current text-gray-600 w-3" viewBox="0 0 448 512">
-          <path d="M416 208H272V64c0-17.67-14.33-32-32-32h-32c-17.67 0-32 14.33-32 32v144H32c-17.67 0-32 14.33-32 32v32c0 17.67 14.33 32 32 32h144v144c0 17.67 14.33 32 32 32h32c17.67 0 32-14.33 32-32V304h144c17.67 0 32-14.33 32-32v-32c0-17.67-14.33-32-32-32z"/>
-        </svg>
-      </div>
-
-      <!-- Price -->
-      <span class="text-center w-1/6 font-semibold text-sm">${item.price}</span>
-      
-    </div>`;
-}
-
 
 //
 // Generate Recommendations
 //
 
+// TODO: REMOVE THIS!
 function truncateName(str) {
-  return (str.length > 50) ? 
-    str.substr(0, 35).concat("...") :
-    str;
+  const name = str.split("-")[0].trim();
+  // title case
+  return name.toLowerCase()
+    .split(' ')
+    .map((s) => s.charAt(0).toUpperCase() + s.substring(1))
+    .join(' ');
 }
 
 function generateRelatedProducts(container, state) {
-  console.log("getting relatedProducts()...", state);
-  const recs = [];
 
   relatedProducts({
     indexName: indexName,
     ...state,
     container: container,
     recommendClient: client,
-    view: horizontalSlider,
     headerComponent: () => null,
     fallbackComponent: () => {
       return createElement('article', {
@@ -137,134 +51,55 @@ function generateRelatedProducts(container, state) {
         },
       });
     },
+    classNames: {
+      title: 'text-gray-900 text-xl mt-12 mb-2 font-medium',
+      list:
+        'grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-5 gap-2',
+    },
     itemComponent({ item }) {
-      recs.push(item.objectID);
-
       var score = item._score ? item._score : 'fallback';
-      var color = (recs1.includes(item.objectID)) ? 'blue' : 'red';
-      if (score == 'fallback') {
-        color = 'gray';
-      }
-//               <p><span class="font-bold text-sm">score: </span>${score}
-      return createElement('article', {
-        class: `border-2 border-${color}-400 h-full`,
+
+      return createElement('div', {
+        // class: `border-2 border-${color}-400 h-full`,
         dangerouslySetInnerHTML: {
           __html: `
-            <li class="ais-hits--item p-2">
-
-              <img src="${item.full_url_image}" width="100">
-              <h3 class="font-bold text-sm mb-2">${truncateName(item.name)}</h3>
-              <p>${item.price}</p>
-              <p class="mb-2">
-                <span class="inline-flex items-center justify-center px-2 py-1 text-xs text-white bg-gray-600 font-bold leading-none rounded-full">score: ${score}</span>
-              </p>
-            </li>`,
+           <div class="shadow rounded p-3 flex flex-col space-between w-full h-full">
+              <a class="flex flex-col space-between relative w-full h-full">
+                 <div class="absolute top-2 right-2 px-2 py-05 border border-green-200 text-xs bg-green-50 rounded rounded-full">
+                    <svg class="inline-block text-green-500 mr-1" width="18" viewBox="0 0 24 24">
+                       <path fill="currentColor" d="M18.984 9.984h2.016v4.031h-2.016v-4.031zM15 18v-12h2.016v12h-2.016zM3 14.016v-4.031h2.016v4.031h-2.016zM11.016 21.984v-19.969h1.969v19.969h-1.969zM6.984 18v-12h2.016v12h-2.016z"></path>
+                    </svg>
+                    ${score}
+                 </div>
+                 <div class="flex-none">
+                    <div class="h-32 w-full mb-4 flex items-center"><img class="m-auto w-auto h-auto" src="${item.full_url_image}" alt="${truncateName(item.name)}" style="max-height: 140px; max-width: 160px;"></div>
+                 </div>
+                 <div class="capitalize w-full text-xs text-gray-500 mb-1">
+                  ${item.hierarchicalCategories.lvl2}
+                 </div>
+                 <div class="text-gray-900 text-sm font-medium mb-2 whitespace-normal">
+                  ${truncateName(item.name)}
+                  </div>
+                 <div class="text-sm text-gray-700 mr-2 flex-grow">
+                    <svg class="inline mr-1 text-green-600" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" stroke-linecap="round" stroke-linejoin="round">
+                       <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+                    </svg>
+                    ${item.reviewScore} <span class="text-gray-400">(${item.reviewCount} reviews)</span>
+                 </div>
+                 <div class="my-2 font-semibold text-gray-800 text-sm">${item.price}</div>
+              </a>
+              <button class="active:bg-green-500 focus:outline-none flex-none mt-2 w-full inline-block text-red-600 border-red-500 border text-center rounded px-2 py-1 text-sm hover:bg-red-600 hover:text-white">Add to Cart</button>
+           </div>`,
         },
       });
     },
   });
-
-  return recs;
 }
 
-// 
-// Get initial values
-// 
-function getState() {
-
-  // Products
-  var products = Array.from(
-  document.querySelectorAll("input[name='products']:checked")).map((elem) => elem.value);
-
-  // Fallback state
-  var fallback = document.querySelector('input[name=fallback]:checked').value;
-  var fallbackFilter = {};
-  if (fallback === 'shirts') {
-    fallbackFilter = { facetFilters: ['category:shirt'] };
-  }
-  if (fallback === 'accessories') {
-    fallbackFilter = { facetFilters: ["categories:Accessories"] };
-  }
-
-  // Query params state
-  var queryParameters = document.querySelector('input[name=queryParameters]:checked').value;
-  var queryFilter = {};
-  // only recs with 'ankle' in the name will display
-  if (queryParameters === 'ankle') {
-    queryFilter = { query: "ankle" };
-  }
-  if (queryParameters === 'price') {
-    queryFilter = { numericFilters: "unformated_price > 100"};
-  }
-
-  const state = {
-    objectIDs: products,
-    maxRecommendations: parseInt(document.querySelector('input[name=maxRecs]:checked').value),
-    threshold: parseInt(document.getElementById("myRange").value),
-    fallbackParameters: fallbackFilter,
-    queryParameters: queryFilter,
-  };
-
-  return state;
+const state = {
+  objectIDs: [ "AD541C01I", "1MI82N009" ],
+  maxRecommendations: 10,
+  threshold: 0,
 }
+generateRelatedProducts($hits, state);
 
-
-
-//
-// Initialize Event Listeners
-//
-function initializeEventListeners() {
-  //
-  // Products Checkbox
-  //
-  // Select all checkboxes with the name 'settings' using querySelectorAll.
-  var checkboxes = document.querySelectorAll("input[type=checkbox][name=products]");
-  let products = []
-
-  // Use Array.forEach to add an event listener to each checkbox.
-  checkboxes.forEach(function(checkbox) {
-    checkbox.addEventListener('change', function() {
-      products = 
-        Array.from(checkboxes)  // Convert checkboxes to an array to use filter and map.
-        .filter(i => i.checked) // Use Array.filter to remove unchecked checkboxes.
-        .map(i => i.value)      // Use Array.map to extract only the checkbox values from the array of objects.
-      generateRelatedProducts($hits, getState());
-    })
-  });
-
-  // Threshold Slider
-  var slider = document.getElementById("myRange");
-  var output = document.getElementById("demo");
-  output.innerHTML = slider.value; // Display the default slider value
-  // Update the current slider value (each time you drag the slider handle)
-  slider.oninput = function() {
-      output.innerHTML = this.value;
-  }
-  slider.onchange = function() {
-    generateRelatedProducts($hits, getState());
-  }
-
-  // Max Recommendations
-  var radiosRecs = document.forms["maxRecs"].elements["maxRecs"];
-  for(var i = 0, max = radiosRecs.length; i < max; i++) {
-      radiosRecs[i].onclick = function() {
-          generateRelatedProducts($hits, getState());
-      }
-  }
-
-  // Fallback Params
-  var radiosFallback = document.forms["fallback"].elements["fallback"];
-  for(var i = 0, max = radiosFallback.length; i < max; i++) {
-      radiosFallback[i].onclick = function() {
-          generateRelatedProducts($hits, getState());
-      }
-  }
-
-  // Query Params
-  var radiosQuery = document.forms["queryParameters"].elements["queryParameters"];
-  for(var i = 0, max = radiosQuery.length; i < max; i++) {
-      radiosQuery[i].onclick = function() {
-          generateRelatedProducts($hits, getState());
-      }
-  }
-}
