@@ -57,7 +57,7 @@ function generateMultiQuery(objectIDs, indexName) {
         'objectID',
         'brand', 
         'name', 
-        'unformatted_price', 
+        'unformated_price', 
         'price',
         'category', 
         'full_url_image', 
@@ -121,12 +121,6 @@ function generateRelatedProducts(container, state) {
   console.log("getting relatedProducts()...", state);
   const recs = [];
 
-  // TODO: add in queryParameters
-  // only recs with 'ankle' in the name will display
-  //queryParameters: {
-  //  query: 'ankle',
-  //},
-
   relatedProducts({
     indexName: indexName,
     ...state,
@@ -151,16 +145,19 @@ function generateRelatedProducts(container, state) {
       if (score == 'fallback') {
         color = 'gray';
       }
-
+//               <p><span class="font-bold text-sm">score: </span>${score}
       return createElement('article', {
         class: `border-2 border-${color}-400 h-full`,
         dangerouslySetInnerHTML: {
           __html: `
             <li class="ais-hits--item p-2">
+
               <img src="${item.full_url_image}" width="100">
               <h3 class="font-bold text-sm mb-2">${truncateName(item.name)}</h3>
-              <p>${item.objectID}</p>
-              <p><span class="font-bold text-sm">score: </span>${score}</p>
+              <p>${item.price}</p>
+              <p class="mb-2">
+                <span class="inline-flex items-center justify-center px-2 py-1 text-xs text-white bg-gray-600 font-bold leading-none rounded-full">score: ${score}</span>
+              </p>
             </li>`,
         },
       });
@@ -189,11 +186,23 @@ function getState() {
     fallbackFilter = { facetFilters: ["categories:Accessories"] };
   }
 
+  // Query params state
+  var queryParameters = document.querySelector('input[name=queryParameters]:checked').value;
+  var queryFilter = {};
+  // only recs with 'ankle' in the name will display
+  if (queryParameters === 'ankle') {
+    queryFilter = { query: "ankle" };
+  }
+  if (queryParameters === 'price') {
+    queryFilter = { numericFilters: "unformated_price > 100"};
+  }
+
   const state = {
     objectIDs: products,
     maxRecommendations: parseInt(document.querySelector('input[name=maxRecs]:checked').value),
     threshold: parseInt(document.getElementById("myRange").value),
     fallbackParameters: fallbackFilter,
+    queryParameters: queryFilter,
   };
 
   return state;
@@ -219,7 +228,7 @@ function initializeEventListeners() {
         Array.from(checkboxes)  // Convert checkboxes to an array to use filter and map.
         .filter(i => i.checked) // Use Array.filter to remove unchecked checkboxes.
         .map(i => i.value)      // Use Array.map to extract only the checkbox values from the array of objects.
-      generateRelatedProducts(hits, getState());
+      generateRelatedProducts($hits, getState());
     })
   });
 
@@ -247,6 +256,14 @@ function initializeEventListeners() {
   var radiosFallback = document.forms["fallback"].elements["fallback"];
   for(var i = 0, max = radiosFallback.length; i < max; i++) {
       radiosFallback[i].onclick = function() {
+          generateRelatedProducts($hits, getState());
+      }
+  }
+
+  // Query Params
+  var radiosQuery = document.forms["queryParameters"].elements["queryParameters"];
+  for(var i = 0, max = radiosQuery.length; i < max; i++) {
+      radiosQuery[i].onclick = function() {
           generateRelatedProducts($hits, getState());
       }
   }
