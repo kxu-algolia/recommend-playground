@@ -32,12 +32,58 @@
          
          
          <!-- Sidebar Container: Control Panel -->
-         <div class="w-40 sm:w-64 bg-gray-100">
+         <div id="control" class="w-40 sm:w-64 bg-gray-100">
             <h1 class="text-xl pb-4">Configuration</h1>
             <p>Related Products
                <a class="underline text-blue-600 hover:text-blue-800 visited:text-purple-600" href="https://www.algolia.com/doc/api-reference/api-methods/get-related-products/#parameters">parameters</a>
             </p>
-            <!-- Threshold -->
+
+            <!-- Filter Strategy -->
+            <div class="block my-6">
+               <span class="text-gray-700 font-semibold">Filter Strategy</span>
+               <form id="filterStrategy">
+                  <div class="mt-2">
+                     <div>
+                        <input type="checkbox" name="filterStrategy" value="brand" />
+                        <span class="ml-1 mr-4">Brand</span>
+                     </div>
+                     <div>
+                        <input type="checkbox" name="filterStrategy" value="gender" />
+                        <span class="ml-1 mr-4">Gender</span>
+                     </div>
+                     <div>
+                        <input type="checkbox" name="filterStrategy" value="category" />
+                        <span class="ml-1 mr-4">Category</span>
+                     </div>
+                     <div>
+                        <input type="checkbox" name="filterStrategy" value="price" />
+                        <span class="ml-1 mr-4">Price greater than</span>
+                     </div>
+                  </div>
+               </form>
+            </div>
+
+            <div class="block my-6">
+               <span class="text-gray-700 font-semibold">Fallback Strategy</span>
+               <form id="fallbackStrategy">
+                  <div class="mt-2">
+                     <div>
+                        <input type="radio" name="fallbackStrategy" value="none" checked/>
+                        <span class="ml-1 mr-4">None</span>
+                     </div>
+                     <div>
+                        <input type="radio" name="fallbackStrategy" value="category" />
+                        <span class="ml-1 mr-4">Category</span>
+                     </div>
+                     <div>
+                        <input type="radio" name="fallbackStrategy" value="best" />
+                        <span class="ml-1 mr-4">Best Rated</span>
+                     </div>
+                  </div>
+               </form>
+            </div>
+
+            <!-- 
             <div class="block my-6">
                <span class="text-gray-700 font-semibold">threshold</span>
                <div class="slidecontainer my-1">
@@ -48,48 +94,7 @@
                   <div id="demo" class="inline-block"></div>
                </span>
             </div>
-            <!-- Fallback Parameters -->
-            <div class="block my-6">
-               <span class="text-gray-700 font-semibold">Fallback Strategy</span>
-               <form name="fallback">
-                  <div class="mt-2">
-                     <div>
-                        <input type="radio" class="form-radio" name="fallback" value="none" checked/>
-                        <span class="ml-1 mr-4">None</span>
-                     </div>
-                     <div>
-                        <input type="radio" class="form-radio" name="fallback" value="shirts" />
-                        <span class="ml-1 mr-4">Category: Shirts</span>
-                     </div>
-                     <div>
-                        <input type="radio" class="form-radio" name="fallback" value="accessories" />
-                        <span class="ml-1 mr-4">Category: Accessories</span>
-                     </div>
-                  </div>
-               </form>
-            </div>
-            <!-- Query Parameters -->
-            <div class="block my-6">
-               <span class="text-gray-700 font-semibold">Filter Strategy</span>
-               <form name="queryParameters">
-                  <div class="mt-2">
-                     <div>
-                        <input type="radio" class="form-radio" name="queryParameters" value="none" checked/>
-                        <span class="ml-1 mr-4">None</span>
-                     </div>
-                     <div>
-                        <input type="radio" class="form-radio" name="queryParameters" value="ankle" />
-                        <span class="ml-1 mr-4">Filter: Products w/ Ankle</span>
-                     </div>
-                     <div>
-                        <input type="radio" class="form-radio" name="queryParameters" value="price" />
-                        <span class="ml-1 mr-4">Filter: Price Greater Than</span>
-                     </div>
-                  </div>
-               </form>
-            </div>
-            <!-- Max Recommendations -->
-            <!-- https://tailwind-elements.com/docs/standard/forms/radio/ -->
+
             <div class="block my-6">
                <form name="maxRecs">
                   <label for="maxRecs" class="text-gray-700 font-semibold">maxRecommendations</label>
@@ -109,6 +114,7 @@
                   </div>
                </form>
             </div>
+         -->
          </div>
       </div>
       </div>

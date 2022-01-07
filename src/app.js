@@ -22,10 +22,12 @@ const indexName = 'flagship_fashion';
 
 const $hits = document.getElementById('hits');
 const $cart = document.getElementById('cart');
+const $control = document.getElementById('control');
 
 const objectIDs = {
-  "AD541C01I": "red",         // terrex
+  //"AD541C01I": "red",         // terrex
   "1MI82N009": "blue",        // graphic t shirt  
+  "C2342C00N": "red",         // fairbanks hiking
 };
 var recs1 = null;     // store recs for product to color-code recommendations
 
@@ -34,7 +36,7 @@ const searchClient = algoliasearch(
   'aed9b39a5a489d4a6c9a66d40f66edbf'
 );
 
-
+var products = null;  // store cart product data for dynamic filtering
 
 // Kick everything off! 
 searchClient
@@ -46,8 +48,15 @@ searchClient
   )
   // render shopping cart
   .then(({ results }) => {
+    products = results;
     renderShoppingCart($cart, results);
   })
+  .then(() => {
+    recs1 = generateRelatedProducts($hits, getState());
+  })
+  .then(() => {
+    attachEventListeners();
+  });
 
 /*******************************************************
  * 
@@ -134,13 +143,14 @@ function generateRelatedProducts(container, state) {
     },
     itemComponent({ item }) {
       var score = item._score ? item._score : 'fallback';
+      var scoreColor = item._score ? 'green' : 'gray';
       return createElement('div', {
         dangerouslySetInnerHTML: {
           __html: `
            <div class="shadow rounded p-3 flex flex-col space-between w-full h-full">
               <a class="flex flex-col space-between relative w-full h-full">
-                 <div class="absolute top-2 right-2 px-2 py-05 border border-green-200 text-xs bg-green-50 rounded rounded-full">
-                    <svg class="inline-block text-green-500 mr-1" width="18" viewBox="0 0 24 24">
+                 <div class="absolute top-2 right-2 px-2 py-05 border border-${scoreColor}-200 text-xs bg-${scoreColor}-50 rounded rounded-full">
+                    <svg class="inline-block text-${scoreColor}-500 mr-1" width="18" viewBox="0 0 24 24">
                        <path fill="currentColor" d="M18.984 9.984h2.016v4.031h-2.016v-4.031zM15 18v-12h2.016v12h-2.016zM3 14.016v-4.031h2.016v4.031h-2.016zM11.016 21.984v-19.969h1.969v19.969h-1.969zM6.984 18v-12h2.016v12h-2.016z"></path>
                     </svg>
                     ${score}
@@ -170,10 +180,98 @@ function generateRelatedProducts(container, state) {
   });
 }
 
-const state = {
-  objectIDs: [ "AD541C01I", "1MI82N009" ],
-  maxRecommendations: 10,
-  threshold: 0,
-}
-generateRelatedProducts($hits, state);
+// GET THE VALUES FROM THE FIRST SELECTED ITEM!!
+function getState() {
 
+  var filters = Array.from(
+    document.querySelectorAll("input[name='filterStrategy']:checked")
+  ).map((e) => e.value);
+
+  var fallback = document.querySelector('input[name=fallbackStrategy]:checked').value;
+  console.log("fallback", fallback);  
+  console.log("fallback params", translateFallback(fallback));
+
+
+  return  {
+    objectIDs: [ "AD541C01I", "1MI82N009" ],
+    // maxRecommendations: 10,
+    // threshold: 0,
+
+    queryParameters: translateFilters(filters),
+    fallbackParameters: translateFallback(fallback),
+    /*
+    queryParameters: {
+      facetFilters: [
+        // ['colour:black', 'colour:beige tone/core black/white'],
+        'hierarchicalCategories.lvl1:Mens > Clothing'
+      ]
+    },
+    //queryParameters: { numericFilters: "unformated_price > 100", facetFilters: ['categories:Womens'] },
+    //fallbackParameters: { facetFilters: ['categories:Womens'] },
+    */
+  };
+}
+
+/*******************************************************
+ * 
+ * Dynamically generate queryParameters and fallbackFilters
+ * 
+ *******************************************************/
+
+function translateFallback(fallback) {
+  if (fallback === 'best') {
+    return { numericFilters: [
+      'reviewScore >= 4', 'reviewCount > 25'
+    ]};
+  } else if (fallback === 'category') {
+    return { facetFilters: [
+      'hierarchicalCategories.lvl1:'.concat(parseAttr(products, 'hierarchicalCategories.lvl1')[0])
+    ]};
+  } else {
+    return {}
+  }
+}
+
+// takes Filter Strategy values and formats them into queryParameters
+function translateFilters(filters) {
+  var params = {
+    facetFilters: [],
+    numericFilters: [],
+  };
+  for (const filter of filters) {
+    if (filter === "price") {
+      params.numericFilters.push("unformated_price > ".concat(
+        parseAttr(products, 'unformated_price')[0]
+      ));
+    } else if (filter === "gender") {
+      params.facetFilters.push('genderFilter:'.concat(
+        parseAttr(products, 'genderFilter')[0]
+      ));
+    } else if (filter === "category") {
+      params.facetFilters.push('hierarchicalCategories.lvl1:'.concat(
+        parseAttr(products, 'hierarchicalCategories.lvl1')[0]
+      ));
+    } else if (filter === "brand") {
+      params.facetFilters.push('brand:'.concat(
+        parseAttr(products, 'brand')[0]
+      ));
+    }
+  }
+  return params;
+}
+
+function parseAttr(results, attr) {
+  var arr = [];
+  for (const result of results) {
+    arr.push(result.hits[0][attr]);
+  }
+  return [...new Set(arr)];
+}
+
+
+function attachEventListeners() {
+  document.getElementById('control')
+    .addEventListener('change', event => {
+      generateRelatedProducts($hits, getState());
+    });
+}
