@@ -2,6 +2,8 @@ import algoliasearch from 'algoliasearch';
 import algoliarecommend from '@algolia/recommend';
 import { relatedProducts } from '@algolia/recommend-js';
 import { createElement } from 'preact';
+import { horizontalSlider } from '@algolia/ui-components-horizontal-slider-js';
+import '@algolia/ui-components-horizontal-slider-theme';
 
 /*******************************************************
  * 
@@ -57,6 +59,14 @@ searchClient
   .then(() => {
     attachEventListeners();
   });
+
+
+function attachEventListeners() {
+  document.getElementById('control')
+    .addEventListener('change', event => {
+      generateRelatedProducts($hits, getState());
+    });
+}
 
 /*******************************************************
  * 
@@ -182,33 +192,23 @@ function generateRelatedProducts(container, state) {
 
 // GET THE VALUES FROM THE FIRST SELECTED ITEM!!
 function getState() {
+  console.log("getting state");
+
+  // var ux = document.querySelector('input[name=ux]:checked').value;
 
   var filters = Array.from(
     document.querySelectorAll("input[name='filterStrategy']:checked")
   ).map((e) => e.value);
 
   var fallback = document.querySelector('input[name=fallbackStrategy]:checked').value;
-  console.log("fallback", fallback);  
-  console.log("fallback params", translateFallback(fallback));
-
 
   return  {
     objectIDs: [ "AD541C01I", "1MI82N009" ],
-    // maxRecommendations: 10,
-    // threshold: 0,
-
+    maxRecommendations: 10,
+    threshold: 0,
+    // view: (ux === 'grid') ? null : horizontalSlider,
     queryParameters: translateFilters(filters),
     fallbackParameters: translateFallback(fallback),
-    /*
-    queryParameters: {
-      facetFilters: [
-        // ['colour:black', 'colour:beige tone/core black/white'],
-        'hierarchicalCategories.lvl1:Mens > Clothing'
-      ]
-    },
-    //queryParameters: { numericFilters: "unformated_price > 100", facetFilters: ['categories:Womens'] },
-    //fallbackParameters: { facetFilters: ['categories:Womens'] },
-    */
   };
 }
 
@@ -221,7 +221,7 @@ function getState() {
 function translateFallback(fallback) {
   if (fallback === 'best') {
     return { numericFilters: [
-      'reviewScore >= 4', 'reviewCount > 25'
+      'reviewScore > 4', 'reviewCount > 25'
     ]};
   } else if (fallback === 'category') {
     return { facetFilters: [
@@ -268,10 +268,3 @@ function parseAttr(results, attr) {
   return [...new Set(arr)];
 }
 
-
-function attachEventListeners() {
-  document.getElementById('control')
-    .addEventListener('change', event => {
-      generateRelatedProducts($hits, getState());
-    });
-}
