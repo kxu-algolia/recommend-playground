@@ -55,9 +55,9 @@ function renderCartProduct(item, idx) {
     <li index="${idx}">
        <div class="shadow rounded p-3 flex flex-col space-between w-full h-full">
           <a class="flex flex-col space-between relative w-full h-full">
-             <div class="absolute top-2 right-2 px-2 py-05 border border-gray-200 text-xs bg-gray-50 rounded rounded-full hover:bg-red-100 hover:border-red-200">
+             <button class="absolute top-2 right-2 px-2 py-05 border border-gray-200 text-xs bg-gray-50 rounded rounded-full hover:bg-red-100 hover:border-red-200">
                 x
-             </div>
+             </button>
 
              <div class="flex-none">
                 <div class="h-32 w-full mb-4 flex items-center"><img class="m-auto w-auto h-auto" src="${item.full_url_image}" alt="${formatProductName(item.name)}" style="max-height: 140px; max-width: 160px;"></div>
@@ -81,12 +81,13 @@ function renderCartProduct(item, idx) {
 }
 
 $cart.addEventListener('click', event => {
-  const li = event.target.parentNode.parentNode.parentNode;
-  const idx = parseInt(li.getAttribute('index'));
-  products.splice(idx, 1);
-  $cart.removeChild(li);
-
-  generateRelatedProducts($hits, getState());
+  if (event.target.localName === 'button') {
+    const li = event.target.parentNode.parentNode.parentNode;
+    const idx = parseInt(li.getAttribute('index'));
+    products.splice(idx, 1);
+    $cart.removeChild(li);
+    generateRelatedProducts($hits, getState());
+  }
 });
 
 /*******************************************************
