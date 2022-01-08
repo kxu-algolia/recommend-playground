@@ -4,6 +4,8 @@ import { relatedProducts } from '@algolia/recommend-js';
 import { createElement } from 'preact';
 import { horizontalSlider } from '@algolia/ui-components-horizontal-slider-js';
 import '@algolia/ui-components-horizontal-slider-theme';
+import { autocomplete, getAlgoliaResults } from '@algolia/autocomplete-js';
+import '@algolia/autocomplete-theme-classic';
 
 /*******************************************************
  * 
@@ -37,6 +39,45 @@ const searchClient = algoliasearch(
   '853MYZ81KY', 
   'aed9b39a5a489d4a6c9a66d40f66edbf'
 );
+
+
+const autocompleteSearch = autocomplete({
+  container: '#autocomplete',
+  getSources() {
+    return [
+      {
+        sourceId: 'querySuggestions',
+        getItemInputValue: ({ item }) => item.query,
+        onSelect: ({ item }) => console.log("selected!", item),
+        getItems({ query }) {
+          return getAlgoliaResults({
+            searchClient,
+            queries: [
+              {
+                indexName: 'flagship_fashion',
+                query,
+                params: {
+                  hitsPerPage: 4,
+                },
+              },
+            ],
+          });
+        },
+        templates: {
+          item({ item, createElement }) {
+            return createElement('div', {
+              dangerouslySetInnerHTML: {
+                __html: `<div>
+                  ${item.name}
+                </div>`,
+              },
+            });
+          },
+        },
+      },
+    ];
+  },
+});
 
 var products = null;  // store cart product data for dynamic filtering
 
