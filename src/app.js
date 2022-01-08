@@ -6,7 +6,6 @@ import { horizontalSlider } from '@algolia/ui-components-horizontal-slider-js';
 import '@algolia/ui-components-horizontal-slider-theme';
 import { autocomplete, getAlgoliaResults } from '@algolia/autocomplete-js';
 import '@algolia/autocomplete-theme-classic';
-//import ShoppingCart from './cart.js';
 
 /*******************************************************
  * 
@@ -31,7 +30,7 @@ const searchClient = algoliasearch(
   'aed9b39a5a489d4a6c9a66d40f66edbf'
 );
 
-
+attachEventListeners();
 
 /*******************************************************
  * 
@@ -47,8 +46,8 @@ function addToCart(product) {
   const html = renderCartProduct(product, products.length - 1)
   const fragment = document.createRange().createContextualFragment(html);
   $cart.appendChild(fragment);
-  console.log("cart products count", products.length);
 }
+
 
 function renderCartProduct(item, idx) {
   // const color = objectIDs[item.objectID];
@@ -56,18 +55,18 @@ function renderCartProduct(item, idx) {
     <li index="${idx}">
        <div class="shadow rounded p-3 flex flex-col space-between w-full h-full">
           <a class="flex flex-col space-between relative w-full h-full">
-             <div class="absolute top-2 right-2 px-2 py-05 border border-gray-200 text-xs bg-gray-50 rounded rounded-full hover:bg-red-100">
+             <div class="absolute top-2 right-2 px-2 py-05 border border-gray-200 text-xs bg-gray-50 rounded rounded-full hover:bg-red-100 hover:border-red-200">
                 x
              </div>
 
              <div class="flex-none">
-                <div class="h-32 w-full mb-4 flex items-center"><img class="m-auto w-auto h-auto" src="${item.full_url_image}" alt="${truncateName(item.name)}" style="max-height: 140px; max-width: 160px;"></div>
+                <div class="h-32 w-full mb-4 flex items-center"><img class="m-auto w-auto h-auto" src="${item.full_url_image}" alt="${formatProductName(item.name)}" style="max-height: 140px; max-width: 160px;"></div>
              </div>
              <div class="capitalize w-full text-xs text-gray-500 mb-1">
               ${item.hierarchicalCategories.lvl1}
              </div>
              <div class="text-gray-900 text-sm font-medium mb-2 whitespace-normal">
-              ${truncateName(item.name)}
+              ${formatProductName(item.name)}
               </div>
              <div class="text-sm text-gray-700 mr-2 flex-grow">
                 <svg class="inline mr-1 text-green-600" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" stroke-linecap="round" stroke-linejoin="round">
@@ -86,15 +85,16 @@ $cart.addEventListener('click', event => {
   const idx = parseInt(li.getAttribute('index'));
   products.splice(idx, 1);
   $cart.removeChild(li);
-});
 
+  generateRelatedProducts($hits, getState());
+});
 
 /*******************************************************
  * 
  * Autocomplete
+ * - Main driver code
  * 
  *******************************************************/
-
 
 const autocompleteSearch = autocomplete({
   container: '#autocomplete',
@@ -129,39 +129,13 @@ const autocompleteSearch = autocomplete({
           },
         },
         onSelect: ({ item }) => {
-          console.log("adding to cart!");
           addToCart(item);
-
-          // re-generate recommendations here
+          generateRelatedProducts($hits, getState());
         },
       },
     ];
   },
 });
-
-
-
-/*
-// Kick everything off! 
-searchClient
-  // fetch cart objects
-  .multipleQueries(
-    Object.keys(objectIDs).map((objectID) => {
-      return { indexName: indexName, query: objectID }
-    })
-  )
-  // render shopping cart
-  .then(({ results }) => {
-    products = results;
-    renderShoppingCart($cart, results);
-  })
-  .then(() => {
-    recs1 = generateRelatedProducts($hits, getState());
-  })
-  .then(() => {
-    attachEventListeners();
-  });
-*/
 
 function attachEventListeners() {
   document.getElementById('control')
@@ -170,25 +144,20 @@ function attachEventListeners() {
     });
 }
 
-
 /*******************************************************
  * 
  * Recommend
  * - Generate model inputs
- * - 
  * 
  *******************************************************/
 
-// TODO: REMOVE THIS!
-function truncateName(str) {
+function formatProductName(str) {
   const name = str.split("-")[0].trim();
-  // title case
   return name.toLowerCase()
     .split(' ')
     .map((s) => s.charAt(0).toUpperCase() + s.substring(1))
     .join(' ');
 }
-
 
 function generateRelatedProducts(container, state) {
   relatedProducts({
@@ -226,13 +195,13 @@ function generateRelatedProducts(container, state) {
                     ${score}
                  </div>
                  <div class="flex-none">
-                    <div class="h-32 w-full mb-4 flex items-center"><img class="m-auto w-auto h-auto" src="${item.full_url_image}" alt="${truncateName(item.name)}" style="max-height: 140px; max-width: 160px;"></div>
+                    <div class="h-32 w-full mb-4 flex items-center"><img class="m-auto w-auto h-auto" src="${item.full_url_image}" alt="${formatProductName(item.name)}" style="max-height: 140px; max-width: 160px;"></div>
                  </div>
                  <div class="capitalize w-full text-xs text-gray-500 mb-1">
                   ${item.hierarchicalCategories.lvl1}
                  </div>
                  <div class="text-gray-900 text-sm font-medium mb-2 whitespace-normal">
-                  ${truncateName(item.name)}
+                  ${formatProductName(item.name)}
                   </div>
                  <div class="text-sm text-gray-700 mr-2 flex-grow">
                     <svg class="inline mr-1 text-green-600" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" stroke-linecap="round" stroke-linejoin="round">
@@ -249,6 +218,8 @@ function generateRelatedProducts(container, state) {
     },
   });
 }
+
+
 // GET THE VALUES FROM THE FIRST SELECTED ITEM!!
 function getState() {
   console.log("getting state");
@@ -262,7 +233,7 @@ function getState() {
   var fallback = document.querySelector('input[name=fallbackStrategy]:checked').value;
 
   return  {
-    objectIDs: [ "AD541C01I", "1MI82N009" ],
+    objectIDs: products.map(p => p.objectID),
     maxRecommendations: 10,
     threshold: 0,
     // view: (ux === 'grid') ? null : horizontalSlider,
@@ -322,7 +293,7 @@ function translateFilters(filters) {
 function parseAttr(results, attr) {
   var arr = [];
   for (const result of results) {
-    arr.push(result.hits[0][attr]);
+    arr.push(result[attr]);
   }
   return [...new Set(arr)];
 }
