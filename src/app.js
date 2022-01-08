@@ -6,15 +6,11 @@ import { horizontalSlider } from '@algolia/ui-components-horizontal-slider-js';
 import '@algolia/ui-components-horizontal-slider-theme';
 import { autocomplete, getAlgoliaResults } from '@algolia/autocomplete-js';
 import '@algolia/autocomplete-theme-classic';
+//import ShoppingCart from './cart.js';
 
 /*******************************************************
  * 
  * Initialize
- * - API clients
- * - Event listeners
- * 
- * function initEventListenersCart()
- * function initEventListenersControlPanel()
  * 
  *******************************************************/
 
@@ -28,11 +24,6 @@ const $hits = document.getElementById('hits');
 const $cart = document.getElementById('cart');
 const $control = document.getElementById('control');
 
-const objectIDs = {
-  //"AD541C01I": "red",         // terrex
-  "1MI82N009": "blue",        // graphic t shirt  
-  "C2342C00N": "red",         // fairbanks hiking
-};
 var recs1 = null;     // store recs for product to color-code recommendations
 
 const searchClient = algoliasearch(
@@ -41,73 +32,6 @@ const searchClient = algoliasearch(
 );
 
 
-const autocompleteSearch = autocomplete({
-  container: '#autocomplete',
-  getSources() {
-    return [
-      {
-        sourceId: 'querySuggestions',
-        getItemInputValue: ({ item }) => item.query,
-        onSelect: ({ item }) => console.log("selected!", item),
-        getItems({ query }) {
-          return getAlgoliaResults({
-            searchClient,
-            queries: [
-              {
-                indexName: 'flagship_fashion',
-                query,
-                params: {
-                  hitsPerPage: 4,
-                },
-              },
-            ],
-          });
-        },
-        templates: {
-          item({ item, createElement }) {
-            return createElement('div', {
-              dangerouslySetInnerHTML: {
-                __html: `<div>
-                  ${item.name}
-                </div>`,
-              },
-            });
-          },
-        },
-      },
-    ];
-  },
-});
-
-var products = null;  // store cart product data for dynamic filtering
-
-// Kick everything off! 
-searchClient
-  // fetch cart objects
-  .multipleQueries(
-    Object.keys(objectIDs).map((objectID) => {
-      return { indexName: indexName, query: objectID }
-    })
-  )
-  // render shopping cart
-  .then(({ results }) => {
-    products = results;
-    renderShoppingCart($cart, results);
-  })
-  .then(() => {
-    recs1 = generateRelatedProducts($hits, getState());
-  })
-  .then(() => {
-    attachEventListeners();
-  });
-
-
-function attachEventListeners() {
-  document.getElementById('control')
-    .addEventListener('change', event => {
-      generateRelatedProducts($hits, getState());
-    });
-}
 
 /*******************************************************
  * 
@@ -115,21 +39,27 @@ function attachEventListeners() {
  * 
  *******************************************************/
 
-function renderShoppingCart(container, results) {
-    for (const result of results) {
-      const html = renderCartProduct(result.hits[0], true)
-      const fragment = document.createRange().createContextualFragment(html);
-      container.appendChild(fragment);
-    }
+
+var products = [];
+
+function addToCart(product) {
+  products.push(product);
+  const html = renderCartProduct(product, products.length - 1)
+  const fragment = document.createRange().createContextualFragment(html);
+  $cart.appendChild(fragment);
+  console.log("cart products count", products.length);
 }
 
-function renderCartProduct(item, checked = false) {
-
-  const color = objectIDs[item.objectID];
+function renderCartProduct(item, idx) {
+  // const color = objectIDs[item.objectID];
   return `
-    <li class="auc-Recommend-item">
+    <li index="${idx}">
        <div class="shadow rounded p-3 flex flex-col space-between w-full h-full">
           <a class="flex flex-col space-between relative w-full h-full">
+             <div class="absolute top-2 right-2 px-2 py-05 border border-gray-200 text-xs bg-gray-50 rounded rounded-full hover:bg-red-100">
+                x
+             </div>
+
              <div class="flex-none">
                 <div class="h-32 w-full mb-4 flex items-center"><img class="m-auto w-auto h-auto" src="${item.full_url_image}" alt="${truncateName(item.name)}" style="max-height: 140px; max-width: 160px;"></div>
              </div>
@@ -149,6 +79,95 @@ function renderCartProduct(item, checked = false) {
           </a>
        </div>
     </li>`;
+}
+
+$cart.addEventListener('click', event => {
+  const li = event.target.parentNode.parentNode.parentNode;
+  const idx = parseInt(li.getAttribute('index'));
+  products.splice(idx, 1);
+  $cart.removeChild(li);
+});
+
+
+/*******************************************************
+ * 
+ * Autocomplete
+ * 
+ *******************************************************/
+
+
+const autocompleteSearch = autocomplete({
+  container: '#autocomplete',
+  getSources() {
+    return [
+      {
+        sourceId: 'products',
+        getItemInputValue: ({ item }) => item.query,
+        getItems({ query }) {
+          return getAlgoliaResults({
+            searchClient,
+            queries: [
+              {
+                indexName: 'flagship_fashion',
+                query,
+                params: {
+                  hitsPerPage: 5,
+                },
+              },
+            ],
+          });
+        },
+        templates: {
+          item({ item, createElement }) {
+            return createElement('div', {
+              dangerouslySetInnerHTML: {
+                __html: `<div>
+                  ${item.name}
+                </div>`,
+              },
+            });
+          },
+        },
+        onSelect: ({ item }) => {
+          console.log("adding to cart!");
+          addToCart(item);
+
+          // re-generate recommendations here
+        },
+      },
+    ];
+  },
+});
+
+
+
+/*
+// Kick everything off! 
+searchClient
+  // fetch cart objects
+  .multipleQueries(
+    Object.keys(objectIDs).map((objectID) => {
+      return { indexName: indexName, query: objectID }
+    })
+  )
+  // render shopping cart
+  .then(({ results }) => {
+    products = results;
+    renderShoppingCart($cart, results);
+  })
+  .then(() => {
+    recs1 = generateRelatedProducts($hits, getState());
+  })
+  .then(() => {
+    attachEventListeners();
+  });
+*/
+
+function attachEventListeners() {
+  document.getElementById('control')
+    .addEventListener('change', event => {
+      generateRelatedProducts($hits, getState());
+    });
 }
 
 
@@ -230,7 +249,6 @@ function generateRelatedProducts(container, state) {
     },
   });
 }
-
 // GET THE VALUES FROM THE FIRST SELECTED ITEM!!
 function getState() {
   console.log("getting state");
