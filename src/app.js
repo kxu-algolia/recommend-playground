@@ -22,6 +22,7 @@ const indexName = 'flagship_fashion';
 const $hits = document.getElementById('hits');
 const $cart = document.getElementById('cart');
 const $control = document.getElementById('control');
+const $recs = document.getElementById('container-related-products');
 
 var recs1 = null;     // store recs for product to color-code recommendations
 
@@ -38,7 +39,6 @@ attachEventListeners();
  * 
  *******************************************************/
 
-
 var products = [];
 
 function addToCart(product) {
@@ -46,8 +46,21 @@ function addToCart(product) {
   const html = renderCartProduct(product, products.length - 1)
   const fragment = document.createRange().createContextualFragment(html);
   $cart.appendChild(fragment);
+  if (products.length > 0) {
+    $recs.classList.replace("invisible", "visible");
+  }
 }
 
+function removeFromCart(li) {
+  const idx = parseInt(li.getAttribute('index'));
+  products.splice(idx, 1);
+  $cart.removeChild(li);
+  if (products.length === 0) {
+    $recs.classList.replace("visible", "invisible");
+  } else {
+    generateRelatedProducts($hits, getState());
+  }
+}
 
 function renderCartProduct(item, idx) {
   // const color = objectIDs[item.objectID];
@@ -83,10 +96,7 @@ function renderCartProduct(item, idx) {
 $cart.addEventListener('click', event => {
   if (event.target.localName === 'button') {
     const li = event.target.parentNode.parentNode.parentNode;
-    const idx = parseInt(li.getAttribute('index'));
-    products.splice(idx, 1);
-    $cart.removeChild(li);
-    generateRelatedProducts($hits, getState());
+    removeFromCart(li);
   }
 });
 
@@ -99,6 +109,7 @@ $cart.addEventListener('click', event => {
 
 const autocompleteSearch = autocomplete({
   container: '#autocomplete',
+  placeholder: 'Add a product to cart to get started!',
   getSources() {
     return [
       {

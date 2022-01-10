@@ -12,23 +12,28 @@
    </head>
    <body>
       <div class="w-full max-w-6xl mx-auto px-4 m-4 bg-blue-100 flex-1 flex overflow-hidden">
+
          <!-- Main Content Container -->
          <div class="w-full bg-gray-100">
+            
             <!-- Shopping Cart -->
-            <div class="flex justify-between border-b pb-4">
-               <h1 class="text-xl">Shopping Cart</h1>
+            <div id="container-shopping-cart">
+               <div class="flex justify-between border-b pb-4">
+                  <h1 class="text-xl">Shopping Cart</h1>
+               </div>
+
+               <!-- Autocomplete -->
+               <div id="autocomplete"></div>
+               <ol id="cart" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-5 gap-2"></ol>
             </div>
 
-            <!-- Autocomplete -->
-            <div id="autocomplete"></div>
-
-            <ol id="cart" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-5 gap-2">
-            </ol>
             <!-- Related Products Grid -->
-            <div class="flex justify-between border-b pb-4">
-               <h1 class="text-xl">Related Products</h1>
+            <div id="container-related-products" class="invisible">
+               <div class="flex justify-between border-b pb-4">
+                  <h1 class="text-xl">Related Products</h1>
+               </div>
+               <div id="hits"></div>
             </div>
-            <div id="hits"></div>
          </div>
          <!-- Sidebar Container: Control Panel -->
          <div id="control" class="w-40 sm:w-64 bg-gray-100">
