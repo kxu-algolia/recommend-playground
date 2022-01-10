@@ -123,6 +123,7 @@ const autocompleteSearch = autocomplete({
             return createElement('div', {
               dangerouslySetInnerHTML: {
                 __html: `<div>
+                  <img class="inline-block" src=${item.full_url_image} alt=${formatProductName(item.name)} width="40" height="40" />
                   ${item.name}
                 </div>`,
               },
@@ -161,7 +162,7 @@ function formatProductName(str) {
 }
 
 function generateRelatedProducts(container, state) {
-  relatedProducts({
+  const params = {
     indexName: indexName,
     ...state,
     container: container,
@@ -212,19 +213,19 @@ function generateRelatedProducts(container, state) {
                  </div>
                  <div class="my-2 font-semibold text-gray-800 text-sm">${item.price}</div>
               </a>
-              <button class="active:bg-green-500 focus:outline-none flex-none mt-2 w-full inline-block text-red-600 border-red-500 border text-center rounded px-2 py-1 text-sm hover:bg-red-600 hover:text-white">Add to Cart</button>
+              <button class="focus:outline-none flex-none mt-2 w-full inline-block text-gray-500 border-gray-400 border text-center rounded px-2 py-1 text-sm">Add to Cart</button>
            </div>`,
         },
       });
     },
-  });
+  };
+  console.log(params);
+  relatedProducts(params);
 }
 
 
 // GET THE VALUES FROM THE FIRST SELECTED ITEM!!
 function getState() {
-  console.log("getting state");
-
   // var ux = document.querySelector('input[name=ux]:checked').value;
 
   var filters = Array.from(
