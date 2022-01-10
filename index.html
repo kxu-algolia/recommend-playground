@@ -48,20 +48,20 @@
                <form id="filterStrategy">
                   <div class="mt-2">
                      <div>
-                        <input type="checkbox" name="filterStrategy" value="brand" />
-                        <span class="ml-1 mr-4">Brand</span>
-                     </div>
-                     <div>
-                        <input type="checkbox" name="filterStrategy" value="gender" />
-                        <span class="ml-1 mr-4">Gender</span>
-                     </div>
-                     <div>
                         <input type="checkbox" name="filterStrategy" value="category" />
                         <span class="ml-1 mr-4">Category</span>
                      </div>
                      <div>
+                        <input type="checkbox" name="filterStrategy" value="brand" />
+                        <span class="ml-1 mr-4">Brand</span>
+                     </div>
+                     <div>
                         <input type="checkbox" name="filterStrategy" value="price" />
                         <span class="ml-1 mr-4">Price greater than</span>
+                     </div>
+                     <div>
+                        <input type="checkbox" name="filterStrategy" value="best" />
+                        <span class="ml-1 mr-4">Best Rated</span>
                      </div>
                   </div>
                </form>
@@ -79,54 +79,51 @@
                         <span class="ml-1 mr-4">Category</span>
                      </div>
                      <div>
+                        <input type="radio" name="fallbackStrategy" value="brand" />
+                        <span class="ml-1 mr-4">Brand</span>
+                     </div>
+                     <div>
+                        <input type="radio" name="fallbackStrategy" value="price" />
+                        <span class="ml-1 mr-4">Price greater than</span>
+                     </div>
+                     <div>
                         <input type="radio" name="fallbackStrategy" value="best" />
                         <span class="ml-1 mr-4">Best Rated</span>
                      </div>
                   </div>
                </form>
             </div>
+
+            <div class="block my-6">
+               <span class="text-gray-700 font-semibold">Show Attribution</span>
+               <div class="mt-2">
+                  <input type="checkbox" id="attribution"/>
+                  <span class="ml-1 mr-4">Attribution</span>
+               </div>
+            </div>
+
             <div class="block my-6">
                <span class="text-gray-700 font-semibold">Threshold</span>
                <div class="inline-block">
                   <input id="threshold" class="bg-gray-100" type="number" name="threshold" min="0" max="100" value="0">
                </div>
             </div>
-            <div class="block my-6">
-               <span class="text-gray-700 font-semibold"># Recommendations</span>
-               <div class="inline-block">
-                  <input id="maxRecs" class="bg-gray-100" type="number" name="maxRecs" min="0" max="30" value="0">
-               </div>
-            </div>
-            <div class="block my-6">
-               <span class="text-gray-700 font-semibold">UX</span>
-               <form id="ux">
-                  <div class="mt-2">
-                     <div>
-                        <input type="radio" name="ux" value="grid" checked/>
-                        <span class="inline-block ml-1 mr-4">Grid</span>
-                     </div>
-                     <div>
-                        <input type="radio" name="ux" value="carousel" />
-                        <span class="inline-block ml-1 mr-4">Carousel</span>
-                     </div>
-                  </div>
-               </form>
-            </div>
+
             <div class="block my-6">
                <form name="maxRecs">
                   <label for="maxRecs" class="text-gray-700 font-semibold">maxRecommendations</label>
                   <div class="mt-2">
                      <div>
-                        <input type="radio" name="maxRecs" value="3" />
-                        <span class="ml-1 mr-4">3</span>
-                     </div>
-                     <div>
-                        <input type="radio" name="maxRecs" value="5" />
-                        <span class="ml-1 mr-4">5</span>
-                     </div>
-                     <div>
                         <input type="radio" name="maxRecs" value="10" checked/>
                         <span class="ml-1 mr-4">10</span>
+                     </div>
+                     <div>
+                        <input type="radio" name="maxRecs" value="20" />
+                        <span class="ml-1 mr-4">20</span>
+                     </div>
+                     <div>
+                        <input type="radio" name="maxRecs" value="30" />
+                        <span class="ml-1 mr-4">30 (max)</span>
                      </div>
                   </div>
                </form>
