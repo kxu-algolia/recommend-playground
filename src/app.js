@@ -7,6 +7,11 @@ import '@algolia/ui-components-horizontal-slider-theme';
 import { autocomplete, getAlgoliaResults } from '@algolia/autocomplete-js';
 import '@algolia/autocomplete-theme-classic';
 
+
+// TODO: 
+// update container --> $hits
+// fallback and filter strategy should have the same options
+
 /*******************************************************
  * 
  * Initialize
@@ -31,7 +36,11 @@ const searchClient = algoliasearch(
   'aed9b39a5a489d4a6c9a66d40f66edbf'
 );
 
-attachEventListeners();
+$control.addEventListener('change', event => {
+  //generateRelatedProducts($hits, getState());
+  generateRelatedProductsWithAttribution($hits, getState());
+
+});
 
 /*******************************************************
  * 
@@ -58,14 +67,22 @@ function removeFromCart(li) {
   if (products.length === 0) {
     $recs.classList.replace("visible", "invisible");
   } else {
-    generateRelatedProducts($hits, getState());
+    console.log("removing product from cart, generating recs");
+    //generateRelatedProducts($hits, getState());
+    generateRelatedProductsWithAttribution($hits, getState());
   }
 }
 
 function renderCartProduct(item, idx) {
-  // const color = objectIDs[item.objectID];
+  console.log(item.objectID);
+  console.log(attribution.cart);
+  //console.log(attribution.cart[item.objectID]);
+  //console.log('color details', color);
+
+  //var colorClass = color ? `border-2 border-${color}-400` : '';
+  //console.log('color details', color, colorClass);
   return `
-    <li index="${idx}">
+    <li class="${colorClass}" index="${idx}">
        <div class="shadow rounded p-3 flex flex-col space-between w-full h-full">
           <a class="flex flex-col space-between relative w-full h-full">
              <button class="absolute top-2 right-2 px-2 py-05 border border-gray-200 text-xs bg-gray-50 rounded rounded-full hover:bg-red-100 hover:border-red-200">
@@ -93,6 +110,7 @@ function renderCartProduct(item, idx) {
     </li>`;
 }
 
+// clicked remove from cart button
 $cart.addEventListener('click', event => {
   if (event.target.localName === 'button') {
     const li = event.target.parentNode.parentNode.parentNode;
@@ -142,20 +160,46 @@ const autocompleteSearch = autocomplete({
           },
         },
         onSelect: ({ item }) => {
+          console.log("adding product to cart, generating recs");
           addToCart(item);
-          generateRelatedProducts($hits, getState());
+            //generateRelatedProducts($hits, getState());
+            generateRelatedProductsWithAttribution($hits, getState());
+
         },
       },
     ];
   },
 });
 
-function attachEventListeners() {
-  document.getElementById('control')
-    .addEventListener('change', event => {
-      generateRelatedProducts($hits, getState());
-    });
+/*******************************************************
+ * 
+ * Show Attribution
+ * 
+ *******************************************************/
+
+
+const colors = ['red', 'blue', 'green'];
+var attribution = { cart: {}, recs: {}, };
+
+function createRequest(product) {
+  return {
+    indexName: 'flagship_fashion',
+    objectID: product.objectID,
+    maxRecommendations: 10,
+  };
 }
+
+function generateAttribution(results) {
+  for (var i = 0; i < results.length; i++) {
+    console.log("dumping recs for objectID", products[i].objectID);
+    const objectID = products[i].objectID;
+    attribution.cart[objectID] = colors[i];
+    for (const hit of results[i].hits) {
+      attribution.recs[hit.objectID] = colors[i];
+    }
+  }
+}
+
 
 /*******************************************************
  * 
@@ -170,6 +214,19 @@ function formatProductName(str) {
     .split(' ')
     .map((s) => s.charAt(0).toUpperCase() + s.substring(1))
     .join(' ');
+}
+
+function generateRelatedProductsWithAttribution(container, state) {
+  client.getRelatedProducts(
+    products.map(product => createRequest(product))
+  )
+  .then(({ results }) => {
+    generateAttribution(results);
+    generateRelatedProducts(container, state, attribution);
+  })
+  .catch(err => {
+    console.log(err);
+  });
 }
 
 function generateRelatedProducts(container, state) {
@@ -194,9 +251,12 @@ function generateRelatedProducts(container, state) {
         'grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-5 gap-2',
     },
     itemComponent({ item }) {
+      var color = attribution.recs[item.objectID];
       var score = item._score ? item._score : 'fallback';
       var scoreColor = item._score ? 'green' : 'gray';
+
       return createElement('div', {
+        class: color ? `border-2 border-${color}-400` : '',
         dangerouslySetInnerHTML: {
           __html: `
            <div class="shadow rounded p-3 flex flex-col space-between w-full h-full">
