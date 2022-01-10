@@ -34,148 +34,18 @@ const searchClient = algoliasearch(
   'aed9b39a5a489d4a6c9a66d40f66edbf'
 );
 
+// Object[]
+var PRODUCTS = [];
 const COLORS = ['red', 'blue', 'green'];
 
-// Object[]
-var products = [];
-
 $control.addEventListener('change', event => {
-  //generateRelatedProducts($hits, getState());
-  generateRelatedProductsWithAttribution($hits, getState());
-
+  execute()
 });
 
-
-/*******************************************************
- * 
- * Show Attribution (new)
- * 
- *******************************************************/
-
-
-function execute() {
-  const state = getState();
-  if (state.showAttribution) {
-    client.getRelatedProducts(
-      products.map(product => createRequest(product))
-    )
-    .then(({ results }) => {
-      const attribution = generateAttribution(results);
-      renderCart(attribution);
-      generateRelatedProducts($hits, state, attribution);
-    })
-    .catch(err => {
-      console.log(err);
-    });
-  } else {
-    renderCart();
-    generateRelatedProducts($hits, state);
-  }
-}
-
-function renderCart(attribution = null) {
-  $cart.innerHTML = '';
-  for (var i = 0; i < products.length; i++) {
-    const color = attribution ? 
-      attribution.cart[products[i].objectID] :
-      null;
-    const html = renderCartProduct(products[i], i, color)
-    const fragment = document.createRange().createContextualFragment(html);
-    $cart.appendChild(fragment);
-  }
-}
-
-function createRequest(product) {
-  return {
-    indexName: 'flagship_fashion',
-    objectID: product.objectID,
-    maxRecommendations: 10,
-  };
-}
-
-function generateAttribution(results) {
-  var attribution = {
-    cart: {},
-    recs: {},
-  };
-  for (var i = 0; i < results.length; i++) {
-    const objectID = products[i].objectID;
-    attribution.cart[objectID] = COLORS[i];
-    for (const hit of results[i].hits) {
-      attribution.recs[hit.objectID] = COLORS[i];
-    }
-  }
-  return attribution;
-}
-
-
-/*******************************************************
- * 
- * Shopping Cart
- * 
- *******************************************************/
-
-function addToCart(product) {
-  console.log("top of addToCart()", product.name);
-  products.push(product);
-  if (products.length > 0) {
-    $recs.classList.replace("invisible", "visible");
-  }
-}
-
-function removeFromCart(li) {
-  const idx = parseInt(li.getAttribute('index'));
-  products.splice(idx, 1);
-  if (products.length === 0) {
-    $recs.classList.replace("visible", "invisible");
-  }
-  execute();
-}
-
-function renderCartProduct(item, idx, color = null) {
-  var colorClass = color ? `border-2 border-${color}-400` : '';
-
-  return `
-    <li class="${colorClass}" index="${idx}">
-       <div class="shadow rounded p-3 flex flex-col space-between w-full h-full">
-          <a class="flex flex-col space-between relative w-full h-full">
-             <button class="absolute top-2 right-2 px-2 py-05 border border-gray-200 text-xs bg-gray-50 rounded rounded-full hover:bg-red-100 hover:border-red-200">
-                x
-             </button>
-
-             <div class="flex-none">
-                <div class="h-32 w-full mb-4 flex items-center"><img class="m-auto w-auto h-auto" src="${item.full_url_image}" alt="${formatProductName(item.name)}" style="max-height: 140px; max-width: 160px;"></div>
-             </div>
-             <div class="capitalize w-full text-xs text-gray-500 mb-1">
-              ${item.hierarchicalCategories.lvl1}
-             </div>
-             <div class="text-gray-900 text-sm font-medium mb-2 whitespace-normal">
-              ${formatProductName(item.name)}
-              </div>
-             <div class="text-sm text-gray-700 mr-2 flex-grow">
-                <svg class="inline mr-1 text-green-600" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" stroke-linecap="round" stroke-linejoin="round">
-                   <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
-                </svg>
-                ${item.reviewScore} <span class="text-gray-400">(${item.reviewCount} reviews)</span>
-             </div>
-             <div class="my-2 font-semibold text-gray-800 text-sm">${item.price}</div>
-          </a>
-       </div>
-    </li>`;
-}
-
-// clicked remove from cart button
-$cart.addEventListener('click', event => {
-  if (event.target.localName === 'button') {
-    const li = event.target.parentNode.parentNode.parentNode;
-    removeFromCart(li);
-  }
-});
 
 /*******************************************************
  * 
  * Autocomplete
- * - Main driver code
  * 
  *******************************************************/
 
@@ -216,14 +86,90 @@ const autocompleteSearch = autocomplete({
         onSelect: ({ item }) => {
           addToCart(item);
           execute();
-          console.log("adding to cart!", products);
-          //generateRelatedProducts($hits, getState());
-          //generateRelatedProductsWithAttribution($hits, getState());
         },
       },
     ];
   },
 });
+
+
+
+/*******************************************************
+ * 
+ * Shopping Cart
+ * 
+ *******************************************************/
+
+
+// clicked remove from cart button
+$cart.addEventListener('click', event => {
+  if (event.target.localName === 'button') {
+    removeFromCart(event.target.parentNode.parentNode.parentNode);
+    execute();
+  }
+});
+
+
+function addToCart(product) {
+  console.log("top of addToCart()", product.name);
+  PRODUCTS.push(product);
+  if (PRODUCTS.length > 0) {
+    $recs.classList.replace("invisible", "visible");
+  }
+}
+
+function removeFromCart(li) {
+  const idx = parseInt(li.getAttribute('index'));
+  PRODUCTS.splice(idx, 1);
+  if (PRODUCTS.length === 0) {
+    $recs.classList.replace("visible", "invisible");
+  }
+}
+
+function renderCart(attribution = null) {
+  $cart.innerHTML = '';
+  for (var i = 0; i < PRODUCTS.length; i++) {
+    const color = attribution ? 
+      attribution.cart[PRODUCTS[i].objectID] :
+      null;
+    const html = renderCartProduct(PRODUCTS[i], i, color)
+    const fragment = document.createRange().createContextualFragment(html);
+    $cart.appendChild(fragment);
+  }
+}
+
+function renderCartProduct(item, idx, color = null) {
+  var colorClass = color ? `border-2 border-${color}-400` : '';
+
+  return `
+    <li class="${colorClass}" index="${idx}">
+       <div class="shadow rounded p-3 flex flex-col space-between w-full h-full">
+          <a class="flex flex-col space-between relative w-full h-full">
+             <button class="absolute top-2 right-2 px-2 py-05 border border-gray-200 text-xs bg-gray-50 rounded rounded-full hover:bg-red-100 hover:border-red-200">
+                x
+             </button>
+
+             <div class="flex-none">
+                <div class="h-32 w-full mb-4 flex items-center"><img class="m-auto w-auto h-auto" src="${item.full_url_image}" alt="${formatProductName(item.name)}" style="max-height: 140px; max-width: 160px;"></div>
+             </div>
+             <div class="capitalize w-full text-xs text-gray-500 mb-1">
+              ${item.hierarchicalCategories.lvl1}
+             </div>
+             <div class="text-gray-900 text-sm font-medium mb-2 whitespace-normal">
+              ${formatProductName(item.name)}
+              </div>
+             <div class="text-sm text-gray-700 mr-2 flex-grow">
+                <svg class="inline mr-1 text-green-600" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" stroke-linecap="round" stroke-linejoin="round">
+                   <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+                </svg>
+                ${item.reviewScore} <span class="text-gray-400">(${item.reviewCount} reviews)</span>
+             </div>
+             <div class="my-2 font-semibold text-gray-800 text-sm">${item.price}</div>
+          </a>
+       </div>
+    </li>`;
+}
+
 
 /*******************************************************
  * 
@@ -231,6 +177,48 @@ const autocompleteSearch = autocomplete({
  * 
  *******************************************************/
 
+function execute() {
+  const state = getState();
+  if (state.showAttribution) {
+    client.getRelatedProducts(
+      PRODUCTS.map(product => createRequest(product))
+    )
+    .then(({ results }) => {
+      const attribution = generateAttribution(results);
+      renderCart(attribution);
+      generateRelatedProducts(attribution);
+    })
+    .catch(err => {
+      console.log(err);
+    });
+  } else {
+    renderCart();
+    generateRelatedProducts();
+  }
+}
+
+function createRequest(product) {
+  return {
+    indexName: 'flagship_fashion',
+    objectID: product.objectID,
+    maxRecommendations: 10,
+  };
+}
+
+function generateAttribution(results) {
+  var attribution = {
+    cart: {},
+    recs: {},
+  };
+  for (var i = 0; i < results.length; i++) {
+    const objectID = PRODUCTS[i].objectID;
+    attribution.cart[objectID] = COLORS[i];
+    for (const hit of results[i].hits) {
+      attribution.recs[hit.objectID] = COLORS[i];
+    }
+  }
+  return attribution;
+}
 
 /*******************************************************
  * 
@@ -247,11 +235,12 @@ function formatProductName(str) {
     .join(' ');
 }
 
-function generateRelatedProducts(container, state, attribution = null) {
+function generateRelatedProducts(attribution = null) {
+  const state = getState();
   const params = {
     indexName: indexName,
-    ...state,
-    container: container,
+    ...state.params,
+    container: $hits,
     recommendClient: client,
     headerComponent: () => null,
     fallbackComponent: () => {
@@ -312,6 +301,11 @@ function generateRelatedProducts(container, state, attribution = null) {
   relatedProducts(params);
 }
 
+/*******************************************************
+ * 
+ * State Management
+ * 
+ *******************************************************/
 
 // GET THE VALUES FROM THE FIRST SELECTED ITEM!!
 function getState() {
@@ -324,21 +318,17 @@ function getState() {
   var fallback = document.querySelector('input[name=fallbackStrategy]:checked').value;
 
   return  {
-    objectIDs: products.map(p => p.objectID),
-    maxRecommendations: 10,
-    threshold: 0,
     // view: (ux === 'grid') ? null : horizontalSlider,
-    queryParameters: translateFilters(filters),
-    fallbackParameters: translateFallback(fallback),
     showAttribution: false,
+    params: {
+      objectIDs: PRODUCTS.map(p => p.objectID),
+      maxRecommendations: 10,
+      threshold: 0,
+      queryParameters: translateFilters(filters),
+      fallbackParameters: translateFallback(fallback),
+    },
   };
 }
-
-/*******************************************************
- * 
- * Dynamically generate queryParameters and fallbackFilters
- * 
- *******************************************************/
 
 function translateFallback(fallback) {
   if (fallback === 'best') {
@@ -347,7 +337,7 @@ function translateFallback(fallback) {
     ]};
   } else if (fallback === 'category') {
     return { facetFilters: [
-      'hierarchicalCategories.lvl1:'.concat(parseAttr(products, 'hierarchicalCategories.lvl1')[0])
+      'hierarchicalCategories.lvl1:'.concat(parseAttr(PRODUCTS, 'hierarchicalCategories.lvl1')[0])
     ]};
   } else {
     return {}
@@ -363,19 +353,19 @@ function translateFilters(filters) {
   for (const filter of filters) {
     if (filter === "price") {
       params.numericFilters.push("unformated_price > ".concat(
-        parseAttr(products, 'unformated_price')[0]
+        parseAttr(PRODUCTS, 'unformated_price')[0]
       ));
     } else if (filter === "gender") {
       params.facetFilters.push('genderFilter:'.concat(
-        parseAttr(products, 'genderFilter')[0]
+        parseAttr(PRODUCTS, 'genderFilter')[0]
       ));
     } else if (filter === "category") {
       params.facetFilters.push('hierarchicalCategories.lvl1:'.concat(
-        parseAttr(products, 'hierarchicalCategories.lvl1')[0]
+        parseAttr(PRODUCTS, 'hierarchicalCategories.lvl1')[0]
       ));
     } else if (filter === "brand") {
       params.facetFilters.push('brand:'.concat(
-        parseAttr(products, 'brand')[0]
+        parseAttr(PRODUCTS, 'brand')[0]
       ));
     }
   }
