@@ -29,12 +29,15 @@ const $cart = document.getElementById('cart');
 const $control = document.getElementById('control');
 const $recs = document.getElementById('container-related-products');
 
-var recs1 = null;     // store recs for product to color-code recommendations
-
 const searchClient = algoliasearch(
   '853MYZ81KY', 
   'aed9b39a5a489d4a6c9a66d40f66edbf'
 );
+
+const COLORS = ['red', 'blue', 'green'];
+
+// Object[]
+var products = [];
 
 $control.addEventListener('change', event => {
   //generateRelatedProducts($hits, getState());
@@ -42,19 +45,79 @@ $control.addEventListener('change', event => {
 
 });
 
+
+/*******************************************************
+ * 
+ * Show Attribution (new)
+ * 
+ *******************************************************/
+
+
+function execute() {
+  const state = getState();
+  if (state.showAttribution) {
+    client.getRelatedProducts(
+      products.map(product => createRequest(product))
+    )
+    .then(({ results }) => {
+      const attribution = generateAttribution(results);
+      renderCart(attribution);
+      generateRelatedProducts($hits, state, attribution);
+    })
+    .catch(err => {
+      console.log(err);
+    });
+  } else {
+    renderCart();
+    generateRelatedProducts($hits, state);
+  }
+}
+
+function renderCart(attribution = null) {
+  $cart.innerHTML = '';
+  for (var i = 0; i < products.length; i++) {
+    const color = attribution ? 
+      attribution.cart[products[i].objectID] :
+      null;
+    const html = renderCartProduct(products[i], i, color)
+    const fragment = document.createRange().createContextualFragment(html);
+    $cart.appendChild(fragment);
+  }
+}
+
+function createRequest(product) {
+  return {
+    indexName: 'flagship_fashion',
+    objectID: product.objectID,
+    maxRecommendations: 10,
+  };
+}
+
+function generateAttribution(results) {
+  var attribution = {
+    cart: {},
+    recs: {},
+  };
+  for (var i = 0; i < results.length; i++) {
+    const objectID = products[i].objectID;
+    attribution.cart[objectID] = COLORS[i];
+    for (const hit of results[i].hits) {
+      attribution.recs[hit.objectID] = COLORS[i];
+    }
+  }
+  return attribution;
+}
+
+
 /*******************************************************
  * 
  * Shopping Cart
  * 
  *******************************************************/
 
-var products = [];
-
 function addToCart(product) {
+  console.log("top of addToCart()", product.name);
   products.push(product);
-  const html = renderCartProduct(product, products.length - 1)
-  const fragment = document.createRange().createContextualFragment(html);
-  $cart.appendChild(fragment);
   if (products.length > 0) {
     $recs.classList.replace("invisible", "visible");
   }
@@ -63,24 +126,15 @@ function addToCart(product) {
 function removeFromCart(li) {
   const idx = parseInt(li.getAttribute('index'));
   products.splice(idx, 1);
-  $cart.removeChild(li);
   if (products.length === 0) {
     $recs.classList.replace("visible", "invisible");
-  } else {
-    console.log("removing product from cart, generating recs");
-    //generateRelatedProducts($hits, getState());
-    generateRelatedProductsWithAttribution($hits, getState());
   }
+  execute();
 }
 
-function renderCartProduct(item, idx) {
-  console.log(item.objectID);
-  console.log(attribution.cart);
-  //console.log(attribution.cart[item.objectID]);
-  //console.log('color details', color);
+function renderCartProduct(item, idx, color = null) {
+  var colorClass = color ? `border-2 border-${color}-400` : '';
 
-  //var colorClass = color ? `border-2 border-${color}-400` : '';
-  //console.log('color details', color, colorClass);
   return `
     <li class="${colorClass}" index="${idx}">
        <div class="shadow rounded p-3 flex flex-col space-between w-full h-full">
@@ -160,11 +214,11 @@ const autocompleteSearch = autocomplete({
           },
         },
         onSelect: ({ item }) => {
-          console.log("adding product to cart, generating recs");
           addToCart(item);
-            //generateRelatedProducts($hits, getState());
-            generateRelatedProductsWithAttribution($hits, getState());
-
+          execute();
+          console.log("adding to cart!", products);
+          //generateRelatedProducts($hits, getState());
+          //generateRelatedProductsWithAttribution($hits, getState());
         },
       },
     ];
@@ -176,29 +230,6 @@ const autocompleteSearch = autocomplete({
  * Show Attribution
  * 
  *******************************************************/
-
-
-const colors = ['red', 'blue', 'green'];
-var attribution = { cart: {}, recs: {}, };
-
-function createRequest(product) {
-  return {
-    indexName: 'flagship_fashion',
-    objectID: product.objectID,
-    maxRecommendations: 10,
-  };
-}
-
-function generateAttribution(results) {
-  for (var i = 0; i < results.length; i++) {
-    console.log("dumping recs for objectID", products[i].objectID);
-    const objectID = products[i].objectID;
-    attribution.cart[objectID] = colors[i];
-    for (const hit of results[i].hits) {
-      attribution.recs[hit.objectID] = colors[i];
-    }
-  }
-}
 
 
 /*******************************************************
@@ -216,20 +247,7 @@ function formatProductName(str) {
     .join(' ');
 }
 
-function generateRelatedProductsWithAttribution(container, state) {
-  client.getRelatedProducts(
-    products.map(product => createRequest(product))
-  )
-  .then(({ results }) => {
-    generateAttribution(results);
-    generateRelatedProducts(container, state, attribution);
-  })
-  .catch(err => {
-    console.log(err);
-  });
-}
-
-function generateRelatedProducts(container, state) {
+function generateRelatedProducts(container, state, attribution = null) {
   const params = {
     indexName: indexName,
     ...state,
@@ -240,7 +258,7 @@ function generateRelatedProducts(container, state) {
       return createElement('article', {
         dangerouslySetInnerHTML: {
           __html: `
-            <div>No recommendations! Try setting fallbackParameters</div>
+            <div>No recommendations! Try adding another product or setting a Fallback Strategy.</div>
           `,
         },
       });
@@ -251,7 +269,7 @@ function generateRelatedProducts(container, state) {
         'grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-5 gap-2',
     },
     itemComponent({ item }) {
-      var color = attribution.recs[item.objectID];
+      const color = attribution ? attribution.recs[item.objectID] : null;
       var score = item._score ? item._score : 'fallback';
       var scoreColor = item._score ? 'green' : 'gray';
 
@@ -312,6 +330,7 @@ function getState() {
     // view: (ux === 'grid') ? null : horizontalSlider,
     queryParameters: translateFilters(filters),
     fallbackParameters: translateFallback(fallback),
+    showAttribution: false,
   };
 }
 
