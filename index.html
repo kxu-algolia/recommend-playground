@@ -6,7 +6,8 @@
          name="viewport"
          content="width=device-width, initial-scale=1, shrink-to-fit=no"
          />
-      <title>Algolia Recommend: Shopping Cart Sandbox</title>
+      <title>Recommend: Shopping Cart Demo</title>
+      <link rel="shortcut icon" type="image/x-icon" href="https://res.cloudinary.com/hilnmyskv/image/upload/c_fit,w_32,h_32/algolia-mark.ico">
       <link href="https://unpkg.com/tailwindcss@^2/dist/tailwind.min.css" rel="stylesheet">
       <link rel="stylesheet" href="./src/app.css" />
    </head>
@@ -20,7 +21,7 @@
             <div id="container-shopping-cart" class="pt-2 mx-2 px-2">
                <div>
                   <div class="flex justify-between pb-2 mb-2">
-                     <h1 class="text-2xl">Shopping Cart</h1>
+                     <h1 class="text-2xl font-semibold">Shopping Cart</h1>
                   </div>
                   <div id="autocomplete"></div>
                </div>
@@ -32,17 +33,20 @@
             <!-- Related Products Grid -->
             <div id="container-related-products" class="invisible pt-2 mx-2 px-2">
                <div class="flex justify-between pb-2 mb-2">
-                  <h1 class="text-2xl">Related Products</h1>
+                  <h1 class="text-2xl font-semibold">Related Products</h1>
                </div>
                <div id="hits" class="mb-2"></div>
             </div>
          </div>
          <!-- Sidebar Container: Control Panel -->
          <div id="control" class="mx-2 px-4 pt-2 w-32 sm:w-60 bg-gray-100 h-full">
-            <h1 class="text-2xl pb-4">Algolia Recommend: Related Products Playground</h1>
-            <p>Related Products
-               <a class="underline text-blue-600 hover:text-blue-800 visited:text-purple-600" href="https://www.algolia.com/doc/api-reference/api-methods/get-related-products/#parameters">parameters</a>
-            </p>
+            <h1 class="text-2xl font-semibold pb-4">Algolia Recommend</h1>
+
+            <span class="block text-sm mb-2">Expand your product offerings and grow conversions with Recommend.</span>
+            <span class="block text-sm mb-2">Recommendations can be <strong>fully customized</strong> by setting filtering and fallback strategies.</span>
+            <span class="block text-sm mb-2">
+               <a class="underline text-blue-600 hover:text-blue-800 visited:text-purple-600" href="https://www.algolia.com/doc/rest-api/recommend/">Read the docs</a>
+            </span>
             <div class="block my-6">
                <span class="text-gray-700 font-semibold">Filter Strategy</span>
                <form id="filterStrategy">
@@ -132,6 +136,9 @@
             </div>
          </div>
       </div>
+      <!--div class="w-full max-w-6xl mx-auto">
+         Source code on Codesandbox
+      </div-->
       <script src="./src/app.js"></script>
    </body>
 </html>

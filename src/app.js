@@ -39,7 +39,9 @@ var PRODUCTS = [];
 const COLORS = ['red', 'blue', 'green'];
 
 $control.addEventListener('change', event => {
-  execute()
+  event.preventDefault();
+  execute();
+  return false;
 });
 
 
@@ -86,6 +88,7 @@ const autocompleteSearch = autocomplete({
         onSelect: ({ item }) => {
           addToCart(item);
           execute();
+          return false;
         },
       },
     ];
@@ -103,10 +106,12 @@ const autocompleteSearch = autocomplete({
 
 // clicked remove from cart button
 $cart.addEventListener('click', event => {
+  event.preventDefault();
   if (event.target.localName === 'button') {
     removeFromCart(event.target.parentNode.parentNode.parentNode);
     execute();
   }
+  return false;
 });
 
 
@@ -195,6 +200,7 @@ function execute() {
     renderCart();
     generateRelatedProducts();
   }
+  return false;
 }
 
 function createRequest(product) {
