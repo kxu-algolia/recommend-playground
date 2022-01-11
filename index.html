@@ -11,35 +11,35 @@
       <link rel="stylesheet" href="./src/app.css" />
    </head>
    <body>
-      <div class="w-full max-w-6xl mx-auto px-4 m-4 bg-blue-100 flex-1 flex overflow-hidden">
+      <div class="w-full max-w-6xl mx-auto px-4 m-4 flex-1 flex overflow-hidden">
 
          <!-- Main Content Container -->
-         <div class="w-full bg-gray-100">
+         <div class="w-full">
             
             <!-- Shopping Cart -->
-            <div id="container-shopping-cart">
+            <div id="container-shopping-cart" class="pt-2 mx-2 px-2">
                <div>
-                  <div class="flex justify-between border-b pb-4">
-                     <h1 class="text-xl">Shopping Cart</h1>
+                  <div class="flex justify-between pb-2 mb-2">
+                     <h1 class="text-2xl">Shopping Cart</h1>
                   </div>
                   <div id="autocomplete"></div>
                </div>
 
                <!-- Autocomplete -->
-               <ol id="cart" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-5 gap-2"></ol>
+               <ol id="cart" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-5 gap-2 my-2"></ol>
             </div>
 
             <!-- Related Products Grid -->
-            <div id="container-related-products" class="invisible">
-               <div class="flex justify-between border-b pb-4">
-                  <h1 class="text-xl">Related Products</h1>
+            <div id="container-related-products" class="invisible pt-2 mx-2 px-2">
+               <div class="flex justify-between pb-2 mb-2">
+                  <h1 class="text-2xl">Related Products</h1>
                </div>
-               <div id="hits"></div>
+               <div id="hits" class="mb-2"></div>
             </div>
          </div>
          <!-- Sidebar Container: Control Panel -->
-         <div id="control" class="w-40 sm:w-64 bg-gray-100">
-            <h1 class="text-xl pb-4">Configuration</h1>
+         <div id="control" class="mx-2 px-4 pt-2 w-32 sm:w-60 bg-gray-100 h-full">
+            <h1 class="text-2xl pb-4">Algolia Recommend: Related Products Playground</h1>
             <p>Related Products
                <a class="underline text-blue-600 hover:text-blue-800 visited:text-purple-600" href="https://www.algolia.com/doc/api-reference/api-methods/get-related-products/#parameters">parameters</a>
             </p>
@@ -102,12 +102,14 @@
                </div>
             </div>
 
+            <!--
             <div class="block my-6">
                <span class="text-gray-700 font-semibold">Threshold</span>
                <div class="inline-block">
                   <input id="threshold" class="bg-gray-100" type="number" name="threshold" min="0" max="100" value="0">
                </div>
             </div>
+            -->
 
             <div class="block my-6">
                <form name="maxRecs">
