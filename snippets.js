@@ -1,5 +1,5 @@
 
-
+/*
 const str = document.createElement(
   `<!-- Product Row -->
     <div class="flex items-center -mx-4 px-6 py-5">
@@ -32,6 +32,7 @@ const str = document.createElement(
       
     </div>`
   );
+*/
 
 /*
 // Multi-query
@@ -67,7 +68,11 @@ client.multipleQueries(queries).then(({ results }) => {
 });
 */
 
-/*
+
+
+function generateRPWithAtttribution() {
+}
+
 
 // Hit Recommmend API directly
 const algoliarecommend = require('@algolia/recommend');
@@ -75,23 +80,63 @@ const client = algoliarecommend(
   '853MYZ81KY',
   'aed9b39a5a489d4a6c9a66d40f66edbf'
 );
-const products = client.getRelatedProducts([
-  {
+const products = ["VA111N0DI", "ST311A092"];
+
+const colors = ['red', 'blue', 'green'];
+var attribution = { cart: {}, recs: {}, };
+
+function createRequest(objectID) {
+  return {
     indexName: 'flagship_fashion',
-    objectID: 'RAD11A0FI',
+    objectID: objectID,
     maxRecommendations: 10,
-  },
-])
+  };
+}
+
+function generateAttribution(results) {
+  for (var i = 0; i < results.length; i++) {
+    console.log("dumping recs for objectID", products[i]);
+    const objectID = products[i];
+    attribution.cart[objectID] = colors[i];
+    for (const hit of results[i].hits) {
+      attribution.recs[hit.objectID] = colors[i];
+    }
+  }
+}
+
+client.getRelatedProducts(
+  products.map(product => createRequest(product))
+)
 .then(({ results }) => {
-  console.log(JSON.stringify(results));
+  generateAttribution(results);
+  console.log("dumping attribution", attribution);
 })
 .catch(err => {
   console.log(err);
 });
 
+/*
+const products = client.getRelatedProducts([
+  {
+    indexName: 'flagship_fashion',
+    objectID: 'ST311A092',
+    maxRecommendations: 10,
+  },
+])
+.then(({ results }) => {
+
+
+
+  for (const hit of results[0].hits) {
+    console.log(hit.objectID, hit._score, hit.name);
+  }
+
+  //console.log(JSON.stringify(results));
+})
+.catch(err => {
+  console.log(err);
+});
 */
-
-
 
 
 /* Button with Event Listener
@@ -112,3 +157,27 @@ $button.addEventListener('click', (event) => {
 });
 
 */
+
+
+/*
+UX: Carousel vs Grid
+
+  <!--
+  <div class="block my-6">
+     <span class="text-gray-700 font-semibold">UX</span>
+     <form id="ux">
+        <div class="mt-2">
+           <div>
+              <input type="radio" name="ux" value="grid" checked/>
+              <span class="inline-block ml-1 mr-4">Grid</span>
+           </div>
+           <div>
+              <input type="radio" name="ux" value="carousel" />
+              <span class="inline-block ml-1 mr-4">Carousel</span>
+           </div>
+        </div>
+     </form>
+  </div>
+
+*/  
+
