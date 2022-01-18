@@ -116,7 +116,6 @@ $cart.addEventListener('click', event => {
 
 
 function addToCart(product) {
-  console.log("top of addToCart()", product.name);
   PRODUCTS.push(product);
   if (PRODUCTS.length > 0) {
     $recs.classList.replace("invisible", "visible");
@@ -194,7 +193,7 @@ function execute() {
       generateRelatedProducts(attribution);
     })
     .catch(err => {
-      console.log(err);
+      console.log("[ERROR] getRelatedProducts() w/ attribution", err);
     });
   } else {
     renderCart();
@@ -307,7 +306,11 @@ function generateRelatedProducts(attribution = null) {
       });
     },
   };
-  console.log(params);
+  console.log("relatedProducts()", {
+    indexName: indexName,
+    objectIDs: PRODUCTS.map(p => p.objectID),
+    ...state.params
+  });
   relatedProducts(params);
 }
 
