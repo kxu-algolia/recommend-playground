@@ -320,85 +320,94 @@ function generateRelatedProducts(attribution = null) {
  * 
  *******************************************************/
 
-// GET THE VALUES FROM THE FIRST SELECTED ITEM!!
 function getState() {
   // var ux = document.querySelector('input[name=ux]:checked').value;
 
-  var maxRecs = parseInt(document.querySelector('input[name=maxRecs]:checked').value);
   var filters = Array.from(
     document.querySelectorAll("input[name='filterStrategy']:checked")
   ).map((e) => e.value);
+  var fallback = document.querySelector('input[name=fallbackStrategy]:checked').value;
 
+  var maxRecs = parseInt(document.querySelector('input[name=maxRecs]:checked').value);
   var attribution = document.querySelector("input[id='attribution']").checked;
 
-  var fallback = document.querySelector('input[name=fallbackStrategy]:checked').value;
+  var queryParameters = translateSearchParams(filters);
+  var fallbackParameters = (fallback != "none") ?
+    translateSearchParams([ fallback ]) :
+    {};
 
   return  {
     showAttribution: attribution,
     params: {
       maxRecommendations: maxRecs,
       threshold: 0,
-      queryParameters: translateFilters(filters),
-      fallbackParameters: translateFallback(fallback),
+      queryParameters: queryParameters,
+      fallbackParameters: fallbackParameters,
       // view: (ux === 'grid') ? null : horizontalSlider,
     },
   };
 }
 
-// takes Filter Strategy values and formats them into queryParameters
-function translateFilters(filters) {
+
+/*******************************************************
+ * 
+ * Filters / Fallbacks
+ * 
+ *******************************************************/
+
+function generateCategoryFilters() {
+  var arr = [];
+  for (const product of PRODUCTS) {
+    const val = resolve('hierarchicalCategories.lvl1', product);
+    const str = `hierarchicalCategories.lvl1:${val}`;
+    arr.push(str);
+  }
+  return arr;
+}
+
+function generateBrandFilters() {
+  var arr = [];
+  for (const product of PRODUCTS) {
+    const val = resolve('brand', product);
+    const str = `brand:${val}`;
+    arr.push(str);
+  }
+  return arr;
+}
+
+function generatePriceFilters() {
+  var max = 0;
+  for (const product of PRODUCTS) {
+    const price = resolve('unformated_price', product);
+    if (price > max) max = price;
+  }
+  return [`unformated_price > ${max}`];
+}
+
+function translateSearchParams(filters) {
   var facetFilters = [],
       numericFilters = [];
   for (const filter of filters) {
-    if (filter === "price") {
-      numericFilters.push("unformated_price > ".concat(
-        parseAttr(PRODUCTS, 'unformated_price')[0]
-      ));
-    } else if (filter === "best") {
-      numericFilters.push('reviewScore > 4', 'reviewCount > 25');
-    } else if (filter === "category") {
-      facetFilters.push('hierarchicalCategories.lvl1:'.concat(
-        parseAttr(PRODUCTS, 'hierarchicalCategories.lvl1')[0]
-      ));
+    if (filter === "category") {
+      facetFilters = facetFilters.concat(generateCategoryFilters());
     } else if (filter === "brand") {
-      facetFilters.push('brand:'.concat(
-        parseAttr(PRODUCTS, 'brand')[0]
-      ));
+      facetFilters = facetFilters.concat(generateBrandFilters());
+    } else if (filter === "best") {
+      numericFilters = numericFilters.concat(['reviewScore > 4', 'reviewCount > 25']);
+    } else if (filter === "price") {
+      numericFilters = numericFilters.concat(generatePriceFilters());
     }
-  }
+  };
   return {
-    facetFilters: facetFilters,
+    facetFilters: [
+      [...new Set(facetFilters)]      // inner array for OR filters
+    ],
     numericFilters: numericFilters,
   }
 }
 
-function translateFallback(fallback) {
-  if (fallback === 'best') {
-    return { numericFilters: [
-      'reviewScore > 4', 'reviewCount > 25'
-    ]};
-  } else if (fallback === 'category') {
-    return { facetFilters: [
-      'hierarchicalCategories.lvl1:'.concat(parseAttr(PRODUCTS, 'hierarchicalCategories.lvl1')[0])
-    ]};
-  } else if (fallback === 'brand') {
-    return { facetFilters: [
-      'brand:'.concat(parseAttr(PRODUCTS, 'brand')[0])
-    ]};
-  } else if (fallback === 'price') {
-    return { numericFilters: [
-      "unformated_price > ".concat(parseAttr(PRODUCTS, 'unformated_price')[0])
-    ]};
-  } else {
-    return {}
-  }
+function resolve(path, obj) {
+  return path.split('.').reduce(function(prev, curr) {
+      return prev ? prev[curr] : null
+  }, obj || self);
 }
-
-function parseAttr(results, attr) {
-  var arr = [];
-  for (const result of results) {
-    arr.push(result[attr]);
-  }
-  return [...new Set(arr)];
-}
-
