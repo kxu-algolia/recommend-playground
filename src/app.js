@@ -2,14 +2,10 @@ import algoliasearch from 'algoliasearch';
 import algoliarecommend from '@algolia/recommend';
 import { relatedProducts } from '@algolia/recommend-js';
 import { createElement } from 'preact';
-import { horizontalSlider } from '@algolia/ui-components-horizontal-slider-js';
-import '@algolia/ui-components-horizontal-slider-theme';
 import { autocomplete, getAlgoliaResults } from '@algolia/autocomplete-js';
 import '@algolia/autocomplete-theme-classic';
 
-
 // TODO: 
-// refactor fallback / filtering code
 // remove PRODUCTS global
 
 /*******************************************************
@@ -321,7 +317,6 @@ function generateRelatedProducts(attribution = null) {
  *******************************************************/
 
 function getState() {
-  // var ux = document.querySelector('input[name=ux]:checked').value;
 
   var filters = Array.from(
     document.querySelectorAll("input[name='filterStrategy']:checked")
@@ -343,7 +338,6 @@ function getState() {
       threshold: 0,
       queryParameters: queryParameters,
       fallbackParameters: fallbackParameters,
-      // view: (ux === 'grid') ? null : horizontalSlider,
     },
   };
 }
@@ -356,23 +350,17 @@ function getState() {
  *******************************************************/
 
 function generateCategoryFilters() {
-  var arr = [];
-  for (const product of PRODUCTS) {
-    const val = resolve('hierarchicalCategories.lvl1', product);
-    const str = `hierarchicalCategories.lvl1:${val}`;
-    arr.push(str);
-  }
-  return arr;
+  return PRODUCTS.map(product => {
+    var val = resolve('hierarchicalCategories.lvl1', product);
+    return `hierarchicalCategories.lvl1:${val}`;
+  });
 }
 
 function generateBrandFilters() {
-  var arr = [];
-  for (const product of PRODUCTS) {
-    const val = resolve('brand', product);
-    const str = `brand:${val}`;
-    arr.push(str);
-  }
-  return arr;
+  return PRODUCTS.map(product => {
+    var val = resolve('brand', product);
+    return `brand:${val}`;
+  });
 }
 
 function generatePriceFilters() {
@@ -385,17 +373,23 @@ function generatePriceFilters() {
 }
 
 function translateSearchParams(filters) {
-  var facetFilters = [],
-      numericFilters = [];
+  var facetFilters = [], numericFilters = [];
   for (const filter of filters) {
-    if (filter === "category") {
-      facetFilters = facetFilters.concat(generateCategoryFilters());
-    } else if (filter === "brand") {
-      facetFilters = facetFilters.concat(generateBrandFilters());
-    } else if (filter === "best") {
-      numericFilters = numericFilters.concat(['reviewScore > 4', 'reviewCount > 25']);
-    } else if (filter === "price") {
-      numericFilters = numericFilters.concat(generatePriceFilters());
+    switch (filter) {
+      case "category":
+        facetFilters = facetFilters.concat(generateCategoryFilters());
+        break;
+      case "brand": 
+        facetFilters = facetFilters.concat(generateBrandFilters());
+        break;
+      case "best": 
+        numericFilters = numericFilters.concat(['reviewScore > 4', 'reviewCount > 25']);
+        break;
+      case "price":
+        numericFilters = numericFilters.concat(generatePriceFilters());
+        break;
+      default:
+        console.log("No case for filter:", filter);
     }
   };
   return {
