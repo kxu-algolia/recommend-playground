@@ -351,7 +351,6 @@ function generateRelatedProducts(attribution = null) {
     objectIDs: PRODUCTS.map(p => p.objectID),
     ...state.params
   });
-  console.log("products", PRODUCTS);
   relatedProducts(params);
 }
 
