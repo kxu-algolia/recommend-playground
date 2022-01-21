@@ -10,36 +10,89 @@ import '@algolia/autocomplete-theme-classic';
 
 /*******************************************************
  * 
+ * App-specific Parameters
+ * 
+ * Change these to make this demo work with a different app
+ * 
+ *******************************************************/
+
+const appID     = '853MYZ81KY';
+const apiKey    = 'aed9b39a5a489d4a6c9a66d40f66edbf';
+const indexName = 'flagship_fashion';
+
+const DISPLAY = {
+  name:   'name',
+  brand:  'brand',
+  image:  'full_url_image',
+  priceStr: 'price',
+  priceNum: 'unformated_price',
+  category:       'hierarchicalCategories.lvl1',
+  reviewScore:    'reviewScore',
+  reviewCount:    'reviewCount',
+};
+
+// Add custom mapping logic here, if any
+function getName(item) {
+  return formatProductName(resolve(DISPLAY.name, item));
+}
+function getImage(item) {
+  return resolve(DISPLAY.image, item);
+}
+function getCategory(item) {
+  return resolve(DISPLAY.category, item);
+}
+function getReviewScore(item) {
+  return resolve(DISPLAY.reviewScore, item);
+}
+function getReviewCount(item) {
+  return resolve(DISPLAY.reviewCount, item);
+}
+function getPrice(item) {
+  return resolve(DISPLAY.priceStr, item);
+}
+
+/*******************************************************
+ * 
+ * Helpers
+ * 
+ *******************************************************/
+
+function resolve(path, obj) {
+  return path.split('.').reduce(function(prev, curr) {
+    return prev ? prev[curr] : null
+  }, obj || self);
+}
+
+function formatProductName(str) {
+  const name = str.split("-")[0].trim();
+  return name.toLowerCase()
+    .split(' ')
+    .map((s) => s.charAt(0).toUpperCase() + s.substring(1))
+    .join(' ');
+}
+
+/*******************************************************
+ * 
  * Initialize
  * 
  *******************************************************/
 
-const client = algoliarecommend(
-  '853MYZ81KY',
-  'aed9b39a5a489d4a6c9a66d40f66edbf'
-);
-const indexName = 'flagship_fashion';
-
-const $hits = document.getElementById('hits');
-const $cart = document.getElementById('cart');
-const $control = document.getElementById('control');
-const $recs = document.getElementById('container-related-products');
-
-const searchClient = algoliasearch(
-  '853MYZ81KY', 
-  'aed9b39a5a489d4a6c9a66d40f66edbf'
-);
-
-// Object[]
 var PRODUCTS = [];
-const COLORS = ['red', 'blue', 'green'];
+const COLORS = ['red', 'blue', 'green', 'orange', 'violet'];
+
+const searchClient    = algoliasearch(appID, apiKey);
+const recommendClient = algoliarecommend(appID, apiKey);
+
+const $hits     = document.getElementById('hits');
+const $cart     = document.getElementById('cart');
+const $control  = document.getElementById('control');
+const $recs     = document.getElementById('container-related-products');
 
 $control.addEventListener('change', event => {
   event.preventDefault();
   execute();
   return false;
 });
-
 
 /*******************************************************
  * 
@@ -60,7 +113,7 @@ const autocompleteSearch = autocomplete({
             searchClient,
             queries: [
               {
-                indexName: 'flagship_fashion',
+                indexName: indexName,
                 query,
                 params: {
                   hitsPerPage: 5,
@@ -74,8 +127,8 @@ const autocompleteSearch = autocomplete({
             return createElement('div', {
               dangerouslySetInnerHTML: {
                 __html: `<div>
-                  <img class="inline-block" src=${item.full_url_image} alt=${formatProductName(item.name)} width="40" height="40" />
-                  ${item.name}
+                  <img class="inline-block" src=${getImage(item)} alt=${getName(item)} width="40" height="40" />
+                  ${getName(item)}
                 </div>`,
               },
             });
@@ -91,14 +144,11 @@ const autocompleteSearch = autocomplete({
   },
 });
 
-
-
 /*******************************************************
  * 
  * Shopping Cart
  * 
  *******************************************************/
-
 
 // clicked remove from cart button
 $cart.addEventListener('click', event => {
@@ -150,26 +200,27 @@ function renderCartProduct(item, idx, color = null) {
              </button>
 
              <div class="flex-none">
-                <div class="h-32 w-full mb-4 flex items-center"><img class="m-auto w-auto h-auto" src="${item.full_url_image}" alt="${formatProductName(item.name)}" style="max-height: 140px; max-width: 160px;"></div>
+                <div class="h-32 w-full mb-4 flex items-center"><img class="m-auto w-auto h-auto" src="${getImage(item)}" alt="${getName(item)}" style="max-height: 140px; max-width: 160px;"></div>
              </div>
              <div class="capitalize w-full text-xs text-gray-500 mb-1">
-              ${item.hierarchicalCategories.lvl1}
+              ${getCategory(item)}
              </div>
              <div class="text-gray-900 text-sm font-medium mb-2 whitespace-normal">
-              ${formatProductName(item.name)}
+              ${getName(item)}
               </div>
              <div class="text-sm text-gray-700 mr-2 flex-grow">
                 <svg class="inline mr-1 text-green-600" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" stroke-linecap="round" stroke-linejoin="round">
                    <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
                 </svg>
-                ${item.reviewScore} <span class="text-gray-400">(${item.reviewCount} reviews)</span>
+                ${getReviewScore(item)}<span class="text-gray-400">(${getReviewCount(item)} reviews)</span>
              </div>
-             <div class="my-2 font-semibold text-gray-800 text-sm">${item.price}</div>
+             <div class="my-2 font-semibold text-gray-800 text-sm">
+              ${getPrice(item)}
+            </div>
           </a>
        </div>
     </li>`;
 }
-
 
 /*******************************************************
  * 
@@ -180,7 +231,7 @@ function renderCartProduct(item, idx, color = null) {
 function execute() {
   const state = getState();
   if (state.showAttribution) {
-    client.getRelatedProducts(
+    recommendClient.getRelatedProducts(
       PRODUCTS.map(product => createRequest(product))
     )
     .then(({ results }) => {
@@ -189,7 +240,7 @@ function execute() {
       generateRelatedProducts(attribution);
     })
     .catch(err => {
-      console.log("[ERROR] getRelatedProducts() w/ attribution", err);
+      console.log("[ERR] getRelatedProducts() w/ attribution", err);
     });
   } else {
     renderCart();
@@ -201,7 +252,7 @@ function execute() {
 function createRequest(product) {
   const state = getState();
   return {
-    indexName: 'flagship_fashion',
+    indexName: indexName,
     objectID: product.objectID,
     ...state.params,
   };
@@ -224,18 +275,9 @@ function generateAttribution(results) {
 
 /*******************************************************
  * 
- * Recommend
- * - Generate model inputs
+ * Recommend - Related Products
  * 
  *******************************************************/
-
-function formatProductName(str) {
-  const name = str.split("-")[0].trim();
-  return name.toLowerCase()
-    .split(' ')
-    .map((s) => s.charAt(0).toUpperCase() + s.substring(1))
-    .join(' ');
-}
 
 function generateRelatedProducts(attribution = null) {
   const state = getState();
@@ -244,7 +286,7 @@ function generateRelatedProducts(attribution = null) {
     objectIDs: PRODUCTS.map(p => p.objectID),
     ...state.params,
     container: $hits,
-    recommendClient: client,
+    recommendClient: recommendClient,
     headerComponent: () => null,
     fallbackComponent: () => {
       return createElement('article', {
@@ -280,21 +322,21 @@ function generateRelatedProducts(attribution = null) {
                     ${score}
                  </div>
                  <div class="flex-none">
-                    <div class="h-32 w-full mb-4 flex items-center"><img class="m-auto w-auto h-auto" src="${item.full_url_image}" alt="${formatProductName(item.name)}" style="max-height: 140px; max-width: 160px;"></div>
+                    <div class="h-32 w-full mb-4 flex items-center"><img class="m-auto w-auto h-auto" src="${getImage(item)}" alt="${getName(item)}" style="max-height: 140px; max-width: 160px;"></div>
                  </div>
                  <div class="capitalize w-full text-xs text-gray-500 mb-1">
-                  ${item.hierarchicalCategories.lvl1}
+                  ${getCategory(item)}
                  </div>
                  <div class="text-gray-900 text-sm font-medium mb-2 whitespace-normal">
-                  ${formatProductName(item.name)}
+                  ${getName(item)}
                   </div>
                  <div class="text-sm text-gray-700 mr-2 flex-grow">
                     <svg class="inline mr-1 text-green-600" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" stroke-linecap="round" stroke-linejoin="round">
                        <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
                     </svg>
-                    ${item.reviewScore} <span class="text-gray-400">(${item.reviewCount} reviews)</span>
+                    ${getReviewScore(item)} <span class="text-gray-400">(${getReviewCount(item)} reviews)</span>
                  </div>
-                 <div class="my-2 font-semibold text-gray-800 text-sm">${item.price}</div>
+                 <div class="my-2 font-semibold text-gray-800 text-sm">${getPrice(item)}</div>
               </a>
               <button class="focus:outline-none flex-none mt-2 w-full inline-block text-gray-500 border-gray-400 border text-center rounded px-2 py-1 text-sm">Add to Cart</button>
            </div>`,
@@ -342,34 +384,40 @@ function getState() {
   };
 }
 
-
 /*******************************************************
  * 
  * Filters / Fallbacks
  * 
  *******************************************************/
 
-function generateCategoryFilters() {
+function generateCategoryFilter() {
   return PRODUCTS.map(product => {
-    var val = resolve('hierarchicalCategories.lvl1', product);
-    return `hierarchicalCategories.lvl1:${val}`;
+    var val = resolve(DISPLAY.category, product);
+    return `${DISPLAY.category}:${val}`;
   });
 }
 
-function generateBrandFilters() {
+function generateBrandFilter() {
   return PRODUCTS.map(product => {
-    var val = resolve('brand', product);
-    return `brand:${val}`;
+    var val = resolve(DISPLAY.brand, product);
+    return `${DISPLAY.brand}:${val}`;
   });
 }
 
-function generatePriceFilters() {
+function generateRatingFilter() {
+  return [
+    `${DISPLAY.reviewScore} > 4`,
+    `${DISPLAY.reviewCount} > 25`,
+  ];
+}
+
+function generatePriceFilter() {
   var max = 0;
   for (const product of PRODUCTS) {
-    const price = resolve('unformated_price', product);
+    const price = resolve(DISPLAY.priceNum, product);
     if (price > max) max = price;
   }
-  return [`unformated_price > ${max}`];
+  return [`${DISPLAY.priceStr} > ${max}`];
 }
 
 function translateSearchParams(filters) {
@@ -377,16 +425,16 @@ function translateSearchParams(filters) {
   for (const filter of filters) {
     switch (filter) {
       case "category":
-        facetFilters = facetFilters.concat(generateCategoryFilters());
+        facetFilters = facetFilters.concat(generateCategoryFilter());
         break;
       case "brand": 
-        facetFilters = facetFilters.concat(generateBrandFilters());
+        facetFilters = facetFilters.concat(generateBrandFilter());
         break;
       case "best": 
-        numericFilters = numericFilters.concat(['reviewScore > 4', 'reviewCount > 25']);
+        numericFilters = numericFilters.concat(generateRatingFilter());
         break;
       case "price":
-        numericFilters = numericFilters.concat(generatePriceFilters());
+        numericFilters = numericFilters.concat(generatePriceFilter());
         break;
       default:
         console.log("No case for filter:", filter);
@@ -398,10 +446,4 @@ function translateSearchParams(filters) {
     ],
     numericFilters: numericFilters,
   }
-}
-
-function resolve(path, obj) {
-  return path.split('.').reduce(function(prev, curr) {
-      return prev ? prev[curr] : null
-  }, obj || self);
 }
