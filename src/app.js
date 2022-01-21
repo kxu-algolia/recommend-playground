@@ -32,8 +32,10 @@ const DISPLAY = {
 };
 
 // Add custom mapping logic here, if any
-function getName(item) {
-  return formatProductName(resolve(DISPLAY.name, item));
+function getName(item, format = true) {
+  return (format) ?
+    formatProductName(resolve(DISPLAY.name, item)) :
+    resolve(DISPLAY.name, item);
 }
 function getImage(item) {
   return resolve(DISPLAY.image, item);
@@ -128,7 +130,7 @@ const autocompleteSearch = autocomplete({
               dangerouslySetInnerHTML: {
                 __html: `<div>
                   <img class="inline-block" src=${getImage(item)} alt=${getName(item)} width="40" height="40" />
-                  ${getName(item)}
+                  ${getName(item, false)}
                 </div>`,
               },
             });
@@ -349,6 +351,7 @@ function generateRelatedProducts(attribution = null) {
     objectIDs: PRODUCTS.map(p => p.objectID),
     ...state.params
   });
+  console.log("products", PRODUCTS);
   relatedProducts(params);
 }
 
@@ -417,7 +420,7 @@ function generatePriceFilter() {
     const price = resolve(DISPLAY.priceNum, product);
     if (price > max) max = price;
   }
-  return [`${DISPLAY.priceStr} > ${max}`];
+  return [`${DISPLAY.priceNum} > ${max}`];
 }
 
 function translateSearchParams(filters) {
