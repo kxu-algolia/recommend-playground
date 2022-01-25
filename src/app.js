@@ -16,6 +16,24 @@ import '@algolia/autocomplete-theme-classic';
  * 
  *******************************************************/
 
+ // New Flagship
+const appID     = 'U9UXVSI686';
+const apiKey    = '957a686033e36becc98438f052691675';
+const indexName = 'prod_ECOM_recommend';
+
+const DISPLAY = {
+  name:   'name',
+  brand:  'brand',
+  image:  'image_urls.0',
+  gender: 'gender',
+  color:  'color.original_name',
+  priceStr:     'price.value',
+  category:     'hierarchical_categories.lvl1',
+  reviewScore:  'reviews.rating',
+  reviewCount:  'reviews.count',
+};
+
+/*
 const appID     = '853MYZ81KY';
 const apiKey    = 'aed9b39a5a489d4a6c9a66d40f66edbf';
 const indexName = 'flagship_fashion';
@@ -30,12 +48,11 @@ const DISPLAY = {
   reviewScore:    'reviewScore',
   reviewCount:    'reviewCount',
 };
+*/
 
 // Add custom mapping logic here, if any
 function getName(item, format = true) {
-  return (format) ?
-    formatProductName(resolve(DISPLAY.name, item)) :
-    resolve(DISPLAY.name, item);
+  return resolve(DISPLAY.name, item);
 }
 function getImage(item) {
   return resolve(DISPLAY.image, item);
@@ -50,7 +67,7 @@ function getReviewCount(item) {
   return resolve(DISPLAY.reviewCount, item);
 }
 function getPrice(item) {
-  return resolve(DISPLAY.priceStr, item);
+  return `£ ${resolve(DISPLAY.priceStr, item)}`;
 }
 
 /*******************************************************
@@ -408,18 +425,24 @@ function generateBrandFilter() {
 
 function generateRatingFilter() {
   return [
-    `${DISPLAY.reviewScore} > 4`,
+    `${DISPLAY.reviewScore} >= 4`,
     `${DISPLAY.reviewCount} > 25`,
   ];
+}
+function generateColorFilter() {
+  return PRODUCTS.map(product => {
+    var val = resolve(DISPLAY.color, product);
+    return `${DISPLAY.color}:${val}`;
+  });
 }
 
 function generatePriceFilter() {
   var max = 0;
   for (const product of PRODUCTS) {
-    const price = resolve(DISPLAY.priceNum, product);
+    const price = resolve(DISPLAY.priceStr, product);
     if (price > max) max = price;
   }
-  return [`${DISPLAY.priceNum} > ${max}`];
+  return [`${DISPLAY.priceStr} > ${max}`];
 }
 
 function translateSearchParams(filters) {
@@ -437,6 +460,9 @@ function translateSearchParams(filters) {
         break;
       case "price":
         numericFilters = numericFilters.concat(generatePriceFilter());
+        break;
+      case "color":
+        facetFilters = facetFilters.concat(generateColorFilter());
         break;
       default:
         console.log("No case for filter:", filter);
