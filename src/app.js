@@ -33,23 +33,6 @@ const DISPLAY = {
   reviewCount:  'reviews.count',
 };
 
-/*
-const appID     = '853MYZ81KY';
-const apiKey    = 'aed9b39a5a489d4a6c9a66d40f66edbf';
-const indexName = 'flagship_fashion';
-
-const DISPLAY = {
-  name:   'name',
-  brand:  'brand',
-  image:  'full_url_image',
-  priceStr: 'price',
-  priceNum: 'unformated_price',
-  category:       'hierarchicalCategories.lvl1',
-  reviewScore:    'reviewScore',
-  reviewCount:    'reviewCount',
-};
-*/
-
 // Add custom mapping logic here, if any
 function getName(item, format = true) {
   return resolve(DISPLAY.name, item);
@@ -409,6 +392,16 @@ function getState() {
  * 
  *******************************************************/
 
+function generateDuplicateFilter() {
+  console.log("top of generateduplicate()", arr);
+  const arr = PRODUCTS.map(product => {
+    var val = resolve('objectID', product);
+    return `NOT objectID:${val}`;
+  });
+  console.log("arr", arr);
+  return arr.join(" AND ");
+}
+
 function generateCategoryFilter() {
   return PRODUCTS.map(product => {
     var val = resolve(DISPLAY.category, product);
@@ -446,7 +439,9 @@ function generatePriceFilter() {
 }
 
 function translateSearchParams(filters) {
-  var facetFilters = [], numericFilters = [];
+  var facetFilters    = [],
+      numericFilters  = [],
+      filtersStr      = [];
   for (const filter of filters) {
     switch (filter) {
       case "category":
@@ -464,13 +459,18 @@ function translateSearchParams(filters) {
       case "color":
         facetFilters = facetFilters.concat(generateColorFilter());
         break;
+      case "dedupe":
+        filtersStr = generateDuplicateFilter();
+        break;
       default:
         console.log("No case for filter:", filter);
     }
   };
   return {
+    filters: (filtersStr.length === 0) ? '' : filtersStr,
     facetFilters: [
       [...new Set(facetFilters)]      // inner array for OR filters
+      //...new Set(facetFilters)      // no array for AND filters
     ],
     numericFilters: numericFilters,
   }
