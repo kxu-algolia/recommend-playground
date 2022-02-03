@@ -418,8 +418,7 @@ function generateBrandFilter() {
 
 function generateRatingFilter() {
   return [
-    `${DISPLAY.reviewScore} >= 4`,
-    `${DISPLAY.reviewCount} > 25`,
+    `${DISPLAY.reviewScore} >= 4`
   ];
 }
 function generateColorFilter() {
