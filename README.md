@@ -6,8 +6,6 @@ The Recommend Playground can be used to demo Algolia Recommend for PDP and Check
 
 You can apply different filter and fallback strategies to illustrate the ability to customize which recommendations to show.
 
-For demo talk track and recording, you can use the following links. 
-
 The Recommend Playground can be easily updated with your own recommendations, if available.
 
 
@@ -31,9 +29,9 @@ Recommend request parameters can be viewed in the console.
 
 ## Modifying the Demo
 
-All App specific information is configured at the `src/app.js`, see: https://github.com/kxu-algolia/recommend-playground/blob/master/src/app.js#L11-L54
+> **NOTE**: This demo will only work if Recommend is activated on the App and the Related Products model is trained! 
 
-> This demo will only work if Recommend is activated on the App and the Related Products model is trained! 
+All App specific information is configured at the `src/app.js`, see: https://github.com/kxu-algolia/recommend-playground/blob/master/src/app.js#L11-L54
 
 There are a few steps to modify the demo to another App: 
 
