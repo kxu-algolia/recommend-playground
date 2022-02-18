@@ -1,6 +1,8 @@
 # Recommend Playground
 
-**View the demo**: [algolia-recommend-demo.netlify.app](https://algolia-recommend-playground.netlify.app/)
+![Watch the demo](./assets/demo_screenshot.png)
+
+Play with the [**demo**](https://algolia-recommend-playground.netlify.app/), or watch the [**recording**](https://video.algolia.com/watch/PLtXL9Vk6E2YjZtUCxZbU7)
 
 The Recommend Playground can be used to demo Algolia Recommend for PDP and Checkout page use cases.
 
