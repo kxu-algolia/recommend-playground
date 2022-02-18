@@ -31,11 +31,13 @@ Recommend request parameters can be viewed in the console.
 
 > **NOTE**: This demo will only work if Recommend is activated on the App and the Related Products model is trained! 
 
-All App specific information is configured at the `src/app.js`, see: https://github.com/kxu-algolia/recommend-playground/blob/master/src/app.js#L11-L54
+This demo is available as a **Code Sandbox** template to make it easier for modification and testing: [https://codesandbox.io/s/icy-flower-etd6o](https://codesandbox.io/s/icy-flower-etd6o)
+
+All App specific information is configured at [the top of `src/app.js`](https://github.com/kxu-algolia/recommend-playground/blob/master/src/app.js#L11-L54). 
 
 There are a few steps to modify the demo to another App: 
 
-* Update appID, apiKey, and indexName fields
+* Update `appID`, `apiKey`, and `indexName` fields
 * Update DISPLAY preferences array with `name`, `brand`, `gender`, etc - these get used to create the product cards. 
 
 The getter functions (`getName()`, `getImage()`, etc) are available if there is any custom transformation or mapping logic that needs to be done.
