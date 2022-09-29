@@ -14,7 +14,7 @@
     "@algolia/autocomplete-theme-classic": "^1.5.1",
     "@algolia/client-search": "^4.10.2",
     "@algolia/recommend": "4.10.2",
-    "@algolia/recommend-js": "1.0.0-experimental.6",
+    "@algolia/recommend-js": "1.6.0",
     "@algolia/ui-components-horizontal-slider-js": "^1.0.0",
     "@algolia/ui-components-horizontal-slider-theme": "^1.0.0",
     "@babel/runtime": "7.14.6",
