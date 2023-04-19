@@ -312,10 +312,12 @@ function generateRelatedProducts(attribution = null) {
       if (score === 'fallback') color = null;
 
       var isPromoted = false;
-      if ("promoted" in item._rankingInfo) {
-        if (item._rankingInfo.promoted) {
-          isPromoted = true;
-          score = 'pinned';
+      if (item._rankingInfo) {
+          if ("promoted" in item._rankingInfo) {
+            if (item._rankingInfo.promoted) {
+              isPromoted = true;
+              score = 'pinned';
+          }
         }
       }
 
