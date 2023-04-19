@@ -19,7 +19,7 @@ import '@algolia/autocomplete-theme-classic';
  // New Flagship
 const appID     = 'U9UXVSI686';
 const apiKey    = '957a686033e36becc98438f052691675';
-const indexName = 'prod_ECOM_recommend';
+const indexName = 'prod_ECOM';
 
 const DISPLAY = {
   name:   'name',
