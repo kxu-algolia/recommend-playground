@@ -311,6 +311,14 @@ function generateRelatedProducts(attribution = null) {
       var scoreColor = item._score ? 'green' : 'gray';
       if (score === 'fallback') color = null;
 
+      var isPromoted = false;
+      if ("promoted" in item._rankingInfo) {
+        if (item._rankingInfo.promoted) {
+          isPromoted = true;
+          score = 'pinned';
+        }
+      }
+
       return createElement('div', {
         class: color ? `border-2 border-${color}-400` : '',
         dangerouslySetInnerHTML: {
@@ -380,7 +388,7 @@ function getState() {
     params: {
       maxRecommendations: maxRecs,
       threshold: 0,
-      queryParameters: queryParameters,
+      queryParameters: { ...queryParameters, ...{ getRankingInfo: true }},
       fallbackParameters: fallbackParameters,
     },
   };
