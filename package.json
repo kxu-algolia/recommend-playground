@@ -13,13 +13,18 @@
     "@algolia/autocomplete-js": "^1.5.1",
     "@algolia/autocomplete-theme-classic": "^1.5.1",
     "@algolia/client-search": "^4.10.2",
+    "@algolia/predict": "^1.0.0-alpha.58",
+    "@algolia/predict-js": "^1.7.1",
+    "@algolia/predict-react": "^1.7.1",
     "@algolia/recommend": "^4.14.2",
     "@algolia/recommend-js": "^1.7.1",
     "@algolia/ui-components-horizontal-slider-js": "^1.0.0",
     "@algolia/ui-components-horizontal-slider-theme": "^1.0.0",
     "@babel/runtime": "7.14.6",
     "algoliasearch": "^4.10.2",
-    "preact": "10.5.13"
+    "preact": "10.5.13",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0"
   },
   "devDependencies": {
     "babel-eslint": "10.0.2",
